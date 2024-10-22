@@ -2,7 +2,7 @@
 //  Item.swift
 //  mealFinder
 //
-//  Created by 杨舒捷 on 10/22/24.
+//  Created by Shujie on 10/22/24.
 //
 
 import Foundation
