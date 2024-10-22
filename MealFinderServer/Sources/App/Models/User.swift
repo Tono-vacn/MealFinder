@@ -29,6 +29,7 @@ final class User: Model, Content, Authenticatable, @unchecked Sendable {
     }
 
     func toDTO() -> UserDTO {
-        return UserDTO(id: self.id, username: self.username, email: self.email, passwordHash: self.passwordHash)
+        return UserDTO(id: self.id, username: self.username, email: self.email)
     }
 }
+
