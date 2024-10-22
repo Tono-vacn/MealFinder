@@ -28,4 +28,13 @@ final class Recipe: Model, @unchecked Sendable {
     self.content = content
     self.ingredients = ingredients
   }
+
+  func toDTO() -> RecipeDTO {
+      return RecipeDTO(
+          id: self.id,
+          title: self.title,
+          content: self.content,
+          ingredients: self.ingredients
+      )
+  }
 }
