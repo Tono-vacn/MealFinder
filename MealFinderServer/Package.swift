@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "MealFinder",
+    name: "MealFinderServer",
     platforms: [
        .macOS(.v13)
     ],

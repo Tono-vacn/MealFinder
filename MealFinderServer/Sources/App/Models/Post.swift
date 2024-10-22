@@ -37,7 +37,7 @@ final class Post: Model, @unchecked Sendable {
 
   init() { }
 
-  init(id: UUID? = nil, title: String, content: String, likes: Int, dislikes: Int, createdAt: Date, updatedAt: Date) {
+  init(id: UUID? = nil, title: String, content: String, likes: Int, dislikes: Int, createdAt: Date, updatedAt: Date, userId: UUID? = nil, recipeId: UUID? = nil) {
     self.id = id
     self.title = title
     self.content = content
@@ -45,6 +45,14 @@ final class Post: Model, @unchecked Sendable {
     self.dislikes = dislikes
     self.createdAt = createdAt
     self.updatedAt = updatedAt
+    // self.$user.id = userId
+    // self.$recipe.id = recipeId
+    if let userId = userId {
+      self.$user.id = userId
+    }
+    if let recipeId = recipeId {
+      self.$recipe.id = recipeId
+    }
   }
 
 }

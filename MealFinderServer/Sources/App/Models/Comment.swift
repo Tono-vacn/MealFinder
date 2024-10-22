@@ -39,9 +39,24 @@ final class Comment: Model, @unchecked Sendable {
 
     init() { }
 
-    init(id: UUID? = nil, title: String) {
+    init(id: UUID? = nil, title: String, content: String, likes: Int, dislikes: Int, post_id: UUID? = nil, parentComment_id: UUID? = nil, user_id: UUID? = nil) {
         self.id = id
         self.title = title
+        self.content = content
+        self.likes = likes
+        self.dislikes = dislikes
+        if let post_id = post_id {
+            self.$post.id = post_id
+        }
+        // self.$post.id = post_id
+        if let parentComment_id = parentComment_id {
+            self.$parentComment.id = parentComment_id
+        }
+        // self.$parentComment.id = parentComment_id
+        // self.$user.id = user_id
+        if let user_id = user_id {
+            self.$user.id = user_id
+        }
     }
 
     // func toDTO() -> CommentDTO {
