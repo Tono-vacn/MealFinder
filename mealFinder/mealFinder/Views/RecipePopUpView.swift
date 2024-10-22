@@ -15,7 +15,7 @@ struct RecipePopUpView: View {
 
     var body: some View {
         VStack {
-            // 标题和关闭按钮
+
             HStack {
                 Spacer()
                 Button(action: onClose) {
@@ -26,12 +26,12 @@ struct RecipePopUpView: View {
                 .padding()
             }
 
-            // 菜谱标题
+
             Text(recipe.title)
                 .font(.title)
                 .padding()
 
-            // 菜谱图片
+  
             AsyncImage(url: URL(string: recipe.image)) { image in
                 image
                     .resizable()
@@ -42,25 +42,42 @@ struct RecipePopUpView: View {
             .frame(height: 150)
             .padding()
 
-            // 翻页按钮
-            HStack {
-                Button(action: onPrevious) {
-                    Image(systemName: "chevron.left.circle.fill")
-                        .font(.largeTitle)
-                        .foregroundColor(.blue)
-                }
-                Spacer()
-                Button(action: onNext) {
-                    Image(systemName: "chevron.right.circle.fill")
-                        .font(.largeTitle)
-                        .foregroundColor(.blue)
-                }
-            }
-            .padding()
-
             Spacer()
+
+
+            GeometryReader { geometry in
+                HStack {
+                    Button(action: onPrevious) {
+                        Image(systemName: "chevron.left")
+                            .font(.largeTitle)
+                            .foregroundColor(.black)
+                            .background(
+                                Circle()
+                                    .fill(Color.black.opacity(0))
+                                    .frame(width: 30, height: 30)
+                            )
+                    }
+                    .position(x: 50, y: geometry.size.height - 50)
+
+                    Spacer()
+
+                    Button(action: onNext) {
+                        Image(systemName: "chevron.right")
+                            .font(.largeTitle)
+                            .foregroundColor(.black)
+                            .background(
+                                Circle()
+                                    .fill(Color.white.opacity(0))
+                                    .frame(width: 30, height: 30)
+                            )
+                    }
+                    .position(x: geometry.size.width - 100, y: geometry.size.height - 50)
+                }
+                .frame(height: 80)
+            }
+            .frame(height: 100)
         }
-        .frame(width: 370, height: 700)  // 中央窗口大小
+        .frame(width: 370, height: 700)
         .background(Color.white)
         .cornerRadius(20)
         .shadow(radius: 10)
