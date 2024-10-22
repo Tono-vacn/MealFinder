@@ -56,8 +56,8 @@ struct RecipePopUpView: View {
                                     .fill(Color.black.opacity(0))
                                     .frame(width: 30, height: 30)
                             )
-                    }
-                    .position(x: 50, y: geometry.size.height - 50)
+                    }.padding(10)
+//                    .position(x: 50, y: geometry.size.height - 50)
 
                     Spacer()
 
@@ -70,8 +70,8 @@ struct RecipePopUpView: View {
                                     .fill(Color.white.opacity(0))
                                     .frame(width: 30, height: 30)
                             )
-                    }
-                    .position(x: geometry.size.width - 100, y: geometry.size.height - 50)
+                    }.padding(10)
+//                    .position(x: 200, y: geometry.size.height - 50)
                 }
                 .frame(height: 80)
             }
