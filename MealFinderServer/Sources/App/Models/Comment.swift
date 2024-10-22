@@ -48,19 +48,25 @@ final class Comment: Model, @unchecked Sendable {
         if let post_id = post_id {
             self.$post.id = post_id
         }
-        // self.$post.id = post_id
         if let parentComment_id = parentComment_id {
             self.$parentComment.id = parentComment_id
         }
-        // self.$parentComment.id = parentComment_id
-        // self.$user.id = user_id
         if let user_id = user_id {
             self.$user.id = user_id
         }
     }
 
-    // func toDTO() -> CommentDTO {
-    //     return CommentDTO(id: self.id, title: self.title, content: self.content, likes: self.likes, dislikes: self.dislikes, parentComment: self.parentComment, childrenComments: self.childrenComments, user: self.user)
-    // }
+    func toDTO() -> CommentDTO {
+        return CommentDTO(
+            id: self.id,
+            title: self.title,
+            content: self.content,
+            likes: self.likes,
+            dislikes: self.dislikes,
+            postId: self.$post.id,
+            parentCommentId: self.$parentComment.id,
+            userId: self.$user.id
+        )
+    }
     
 }

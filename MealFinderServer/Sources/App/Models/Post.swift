@@ -56,3 +56,19 @@ final class Post: Model, @unchecked Sendable {
   }
 
 }
+
+extension Post {
+    func toDTO() -> PostDTO {
+        return PostDTO(
+            id: self.id,
+            title: self.title,
+            content: self.content,
+            likes: self.likes,
+            dislikes: self.dislikes,
+            createdAt: self.createdAt,
+            updatedAt: self.updatedAt,
+            userId: self.$user.id,
+            recipeId: self.$recipe.id
+        )
+    }
+}
