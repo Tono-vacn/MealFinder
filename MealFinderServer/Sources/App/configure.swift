@@ -20,8 +20,10 @@ public func configure(_ app: Application) async throws {
         tlsConfiguration: .forClient(certificateVerification: .none)
         )
     ), as: .psql)
-
+ 
     app.migrations.add(CreateTodo())
+    app.migrations.add(CreateUser())
+    app.migrations.add(CreateUserToken())
     // register routes
     try routes(app)
 }

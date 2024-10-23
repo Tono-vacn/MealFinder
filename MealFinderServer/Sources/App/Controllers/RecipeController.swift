@@ -5,10 +5,15 @@ struct RecipeController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let recipes = routes.grouped("recipes")
         recipes.get(use: index)
-        recipes.post(use: create)
+        // recipes.post(use: create)
         recipes.group(":recipeID") { recipe in
             recipe.delete(use: delete)
         }
+
+        let tokenProtected = recipes.grouped(UserToken.authenticator(), User.guardMiddleware())
+        tokenProtected.post(use: create)
+        
+
     }
     
     @Sendable

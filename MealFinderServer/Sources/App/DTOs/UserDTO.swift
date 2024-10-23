@@ -37,6 +37,7 @@ struct CreateUserRequest: Content {
 }
 
 struct UpdateUserRequest: Content {
+    var userID: UUID?
     var username: String?
     var email: String?
     var password: String?

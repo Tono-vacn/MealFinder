@@ -9,11 +9,19 @@ struct UserController: RouteCollection {
     users.get(use: index)
     users.group(":userID") { user in 
       user.get(use: QueryByID)
+      // user.put(use: update)
+      // user.delete(use: delete)
+    }
+
+    let tokenProtected = users.grouped(UserToken.authenticator())
+    tokenProtected.get("me", use: me)
+    tokenProtected.post("logout", use: logout)
+    tokenProtected.group(":userID") { user in
       user.put(use: update)
       user.delete(use: delete)
     }
-    let tokenProtected = users.grouped(UserToken.authenticator())
-    tokenProtected.get("me", use: me)
+    // tokenProtected.put("update", use: update)
+    // tokenProtected.delete("delete", use: delete)
     users.post("login", use: login)
 
   }
@@ -48,8 +56,13 @@ struct UserController: RouteCollection {
 
   @Sendable
   func delete(req: Request) async throws -> HTTPStatus {
+    let curUser = try req.auth.require(User.self)
     guard let user = try await User.find(req.parameters.get("userID"), on: req.db) else {
       throw Abort(.notFound)
+    }
+
+    guard curUser.id == user.id else {
+      throw Abort(.forbidden)
     }
 
     try await user.delete(on: req.db)
@@ -67,10 +80,16 @@ struct UserController: RouteCollection {
 
   @Sendable
   func update(req: Request) async throws -> UserDTO {
+    let curUser = try req.auth.require(User.self)
     let rawUser = try req.content.decode(UpdateUserRequest.self)
-
+    
     guard let user = try await User.find(req.parameters.get("userID"), on: req.db) else {
+      // print(req.parameters.get("userID"))
       throw Abort(.notFound)
+    }
+
+    guard curUser.id == user.id else {
+      throw Abort(.forbidden)
     }
 
     user.username = rawUser.username ?? user.username
@@ -136,10 +155,20 @@ struct UserController: RouteCollection {
   }
 
   @Sendable
+  func logout(req: Request) async throws -> HTTPStatus {
+    let user = try req.auth.require(User.self)
+    guard let token = try await UserToken.query(on: req.db).filter(\.$user.$id == user.requireID()).first() else {
+      throw Abort(.unauthorized)
+    }
+
+    try await token.delete(on: req.db)
+    return .ok
+  }
+
+  @Sendable
   func me(req: Request) async throws -> UserDTO {
     let user = try req.auth.require(User.self)
     return user.toDTO()
   }
-
 
 }
