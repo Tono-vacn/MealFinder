@@ -12,6 +12,14 @@ final class PostUserLike: Model, @unchecked Sendable {
 
     @Parent(key: "user_id")
     var user: User
+
+    init() {}
+
+    init(id: UUID? = nil, post_id: UUID, user_id: UUID) {
+        self.id = id
+        self.$post.id = post_id
+        self.$user.id = user_id
+    }
 }
 
 final class PostUserDislike: Model, @unchecked Sendable {
@@ -25,4 +33,12 @@ final class PostUserDislike: Model, @unchecked Sendable {
 
     @Parent(key: "user_id")
     var user: User
+
+    init() {}
+
+    init(id: UUID? = nil, post_id: UUID, user_id: UUID) {
+        self.id = id
+        self.$post.id = post_id
+        self.$user.id = user_id
+    }
 }

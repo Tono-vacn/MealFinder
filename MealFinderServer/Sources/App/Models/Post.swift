@@ -22,8 +22,14 @@ final class Post: Model, @unchecked Sendable {
   @Siblings(through: PostUserLike.self, from: \.$post, to: \.$user)
   var likes: [User]
 
+  @Field(key: "likes_count")
+  var likesCount: Int
+
   @Siblings(through: PostUserDislike.self, from: \.$post, to: \.$user)
   var dislikes: [User]
+
+  @Field(key: "dislikes_count")
+  var dislikesCount: Int
 
   @Field(key: "created_at")
   var createdAt: Date
@@ -49,6 +55,8 @@ final class Post: Model, @unchecked Sendable {
     self.content = content
     self.likes = []
     self.dislikes = []
+    self.likesCount = 0
+    self.dislikesCount = 0
     self.createdAt = createdAt
     self.updatedAt = updatedAt
     // self.$user.id = userId
@@ -69,8 +77,8 @@ extension Post {
             id: self.id,
             title: self.title,
             content: self.content,
-            likes: self.likes.count,
-            dislikes: self.dislikes.count,
+            likes: self.likesCount,
+            dislikes: self.dislikesCount,
             createdAt: self.createdAt,
             updatedAt: self.updatedAt,
             userId: self.$user.id,

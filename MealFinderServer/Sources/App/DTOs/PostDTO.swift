@@ -2,6 +2,18 @@ import Fluent
 import Vapor
 import Foundation
 
+enum PostOrder: String, Content {
+    case createdAt = "created_at"
+    case updatedAt = "updated_at"
+    case likes = "likes"
+    // case dislikes = "dislikes"
+}
+
+enum PostDirection: String, Content {
+    case asc = "asc"
+    case desc = "desc"
+}
+
 struct PostDTO: Content {
     var id: UUID?
     var title: String
@@ -34,4 +46,16 @@ struct CreatePostRequest: Content {
     var title: String
     var content: String
     var recipe: CreateRecipeRequest
+}
+
+struct UpdatePostRequest: Content {
+    var title: String?
+    var content: String?   
+}
+
+struct IndexByOrderWithQuantityRequest: Content {
+    var order: PostOrder?
+    var index: Int?
+    var offset: Int?
+    var direction: PostDirection?
 }

@@ -28,6 +28,12 @@ final class Comment: Model, @unchecked Sendable {
     @Siblings(through: CommentUserDislike.self, from: \.$comment, to: \.$user)
     var dislikes: [User]
 
+    @Field(key: "likes_count")
+    var likesCount: Int
+
+    @Field(key: "dislikes_count")
+    var dislikesCount: Int
+
     @Parent(key: "post_id")
     var post: Post
 
@@ -67,8 +73,8 @@ final class Comment: Model, @unchecked Sendable {
             id: self.id,
             title: self.title,
             content: self.content,
-            likes: self.likes.count,
-            dislikes: self.dislikes.count,
+            likes: self.likesCount,
+            dislikes: self.dislikesCount,
             postId: self.$post.id,
             parentCommentId: self.$parentComment.id,
             userId: self.$user.id
