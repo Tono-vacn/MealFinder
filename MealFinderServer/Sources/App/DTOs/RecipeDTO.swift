@@ -16,3 +16,9 @@ struct RecipeDTO: Content {
         )
     }
 }
+
+struct CreateRecipeRequest: Content {
+    var title: String
+    var content: String
+    var ingredients: [String]
+}

@@ -16,11 +16,17 @@ final class Comment: Model, @unchecked Sendable {
     @Field(key: "content")
     var content: String
 
-    @Field(key: "likes")
-    var likes: Int
+    // @Field(key: "likes")
+    // var likes: Int
 
-    @Field(key: "dislikes")
-    var dislikes: Int
+    // @Field(key: "dislikes")
+    // var dislikes: Int
+
+    @Siblings(through: CommentUserLike.self, from: \.$comment, to: \.$user)
+    var likes: [User]
+
+    @Siblings(through: CommentUserDislike.self, from: \.$comment, to: \.$user)
+    var dislikes: [User]
 
     @Parent(key: "post_id")
     var post: Post
@@ -39,12 +45,12 @@ final class Comment: Model, @unchecked Sendable {
 
     init() { }
 
-    init(id: UUID? = nil, title: String, content: String, likes: Int, dislikes: Int, post_id: UUID? = nil, parentComment_id: UUID? = nil, user_id: UUID? = nil) {
+    init(id: UUID? = nil, title: String, content: String, post_id: UUID? = nil, parentComment_id: UUID? = nil, user_id: UUID? = nil) {
         self.id = id
         self.title = title
         self.content = content
-        self.likes = likes
-        self.dislikes = dislikes
+        self.likes = []
+        self.dislikes = []
         if let post_id = post_id {
             self.$post.id = post_id
         }
@@ -61,8 +67,8 @@ final class Comment: Model, @unchecked Sendable {
             id: self.id,
             title: self.title,
             content: self.content,
-            likes: self.likes,
-            dislikes: self.dislikes,
+            likes: self.likes.count,
+            dislikes: self.dislikes.count,
             postId: self.$post.id,
             parentCommentId: self.$parentComment.id,
             userId: self.$user.id

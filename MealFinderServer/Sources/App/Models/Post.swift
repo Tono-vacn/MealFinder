@@ -13,11 +13,17 @@ final class Post: Model, @unchecked Sendable {
   @Field(key: "content")
   var content: String
 
-  @Field(key: "likes")
-  var likes: Int
+  // @Field(key: "likes")
+  // var likes: Int
 
-  @Field(key: "dislikes")
-  var dislikes: Int
+  // @Field(key: "dislikes")
+  // var dislikes: Int
+
+  @Siblings(through: PostUserLike.self, from: \.$post, to: \.$user)
+  var likes: [User]
+
+  @Siblings(through: PostUserDislike.self, from: \.$post, to: \.$user)
+  var dislikes: [User]
 
   @Field(key: "created_at")
   var createdAt: Date
@@ -37,12 +43,12 @@ final class Post: Model, @unchecked Sendable {
 
   init() { }
 
-  init(id: UUID? = nil, title: String, content: String, likes: Int, dislikes: Int, createdAt: Date, updatedAt: Date, userId: UUID? = nil, recipeId: UUID? = nil) {
+  init(id: UUID? = nil, title: String, content: String, createdAt: Date, updatedAt: Date, userId: UUID? = nil, recipeId: UUID? = nil) {
     self.id = id
     self.title = title
     self.content = content
-    self.likes = likes
-    self.dislikes = dislikes
+    self.likes = []
+    self.dislikes = []
     self.createdAt = createdAt
     self.updatedAt = updatedAt
     // self.$user.id = userId
@@ -63,8 +69,8 @@ extension Post {
             id: self.id,
             title: self.title,
             content: self.content,
-            likes: self.likes,
-            dislikes: self.dislikes,
+            likes: self.likes.count,
+            dislikes: self.dislikes.count,
             createdAt: self.createdAt,
             updatedAt: self.updatedAt,
             userId: self.$user.id,
