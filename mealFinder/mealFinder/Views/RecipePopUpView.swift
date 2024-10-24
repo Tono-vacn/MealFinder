@@ -12,10 +12,10 @@ struct RecipePopUpView: View {
     let onPrevious: () -> Void
     let onNext: () -> Void
     let onClose: () -> Void
-
+    
     var body: some View {
         VStack {
-
+            
             HStack {
                 Spacer()
                 Button(action: onClose) {
@@ -25,13 +25,13 @@ struct RecipePopUpView: View {
                 }
                 .padding()
             }
-
-
+            
+            
             Text(recipe.title)
                 .font(.title)
                 .padding()
-
-  
+            
+            
             AsyncImage(url: URL(string: recipe.image)) { image in
                 image
                     .resizable()
@@ -41,10 +41,40 @@ struct RecipePopUpView: View {
             }
             .frame(height: 150)
             .padding()
-
+            
             Spacer()
 
-
+            
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    if !recipe.usedIngredients.isEmpty {
+                        Text("Used Ingredients:")
+                            .font(.subheadline)
+                            .padding(.bottom, 5)
+                        
+                        ForEach(recipe.usedIngredients, id: \.id) { ingredient in
+                            Text("• \(ingredient.original)")
+                                .font(.body)
+                        }
+                    }
+                    
+                    if !recipe.missedIngredients.isEmpty {
+                        Text("Missed Ingredients:")
+                            .font(.subheadline)
+                            .padding(.top, 10)
+                        
+                        ForEach(recipe.missedIngredients, id: \.id) { ingredient in
+                            Text("• \(ingredient.original)")
+                                .font(.body)
+                                .foregroundColor(.red)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .frame(maxWidth: 300)
+            
             GeometryReader { geometry in
                 HStack {
                     Button(action: onPrevious) {
@@ -57,10 +87,9 @@ struct RecipePopUpView: View {
                                     .frame(width: 30, height: 30)
                             )
                     }.padding(10)
-//                    .position(x: 50, y: geometry.size.height - 50)
-
+                    
                     Spacer()
-
+                    
                     Button(action: onNext) {
                         Image(systemName: "chevron.right")
                             .font(.largeTitle)
@@ -71,7 +100,7 @@ struct RecipePopUpView: View {
                                     .frame(width: 30, height: 30)
                             )
                     }.padding(10)
-//                    .position(x: 200, y: geometry.size.height - 50)
+                    
                 }
                 .frame(height: 80)
             }
