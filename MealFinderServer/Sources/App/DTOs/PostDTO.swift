@@ -24,6 +24,7 @@ struct PostDTO: Content {
     var updatedAt: Date
     var userId: UUID?
     var recipeId: UUID?
+    var haveComments: Bool
 }
 
 // extension PostDTO {

@@ -11,6 +11,9 @@ struct PostController: RouteCollection {
             // recipe.delete(use: delete)
             post.get(use: QueryByID)
             post.get("comments", use: QueryCommentsByPostID)
+            // post.post("like", use: likePost)
+            // post.post("dislike", use: dislikePost)
+            
         }
 
         let tokenProtected = posts.grouped(UserToken.authenticator(), User.guardMiddleware())
@@ -21,6 +24,7 @@ struct PostController: RouteCollection {
             post.post("like", use: likePost)
             post.post("dislike", use: dislikePost)
             post.put(use: update)
+            post.post("comments", use: CommentPost)
         }
         
 
@@ -169,5 +173,17 @@ struct PostController: RouteCollection {
         }
         return post.toDTO()
       } 
+    }
+
+    @Sendable
+    func CommentPost(req: Request) async throws -> HTTPStatus {
+      let curUser = try req.auth.require(User.self)
+      guard let post = try await Post.find(req.parameters.get("postID"), on: req.db) else {
+          throw Abort(.notFound)
+      }
+      let rawComment = try req.content.decode(CreateCommentRequest.self)
+      let comment = Comment(title: rawComment.title, content: rawComment.content, post_id: post.id!, user_id: curUser.id)
+      try await comment.save(on: req.db)
+      return .created
     }
 }

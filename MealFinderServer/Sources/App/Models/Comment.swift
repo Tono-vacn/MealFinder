@@ -57,6 +57,8 @@ final class Comment: Model, @unchecked Sendable {
         self.content = content
         self.likes = []
         self.dislikes = []
+        self.likesCount = 0
+        self.dislikesCount = 0
         if let post_id = post_id {
             self.$post.id = post_id
         }
@@ -77,7 +79,8 @@ final class Comment: Model, @unchecked Sendable {
             dislikes: self.dislikesCount,
             postId: self.$post.id,
             parentCommentId: self.$parentComment.id,
-            userId: self.$user.id
+            userId: self.$user.id,
+            haveComments: !self.replies.isEmpty
         )
     }
     

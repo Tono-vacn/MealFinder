@@ -82,7 +82,8 @@ extension Post {
             createdAt: self.createdAt,
             updatedAt: self.updatedAt,
             userId: self.$user.id,
-            recipeId: self.$recipe.id
+            recipeId: self.$recipe.id,
+            haveComments: !self.comments.isEmpty
         )
     }
 }

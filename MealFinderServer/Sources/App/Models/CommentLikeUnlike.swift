@@ -12,6 +12,14 @@ final class CommentUserLike: Model, @unchecked Sendable {
 
     @Parent(key: "user_id")
     var user: User
+
+    init() { }
+
+    init(id: UUID? = nil, comment_id: UUID, user_id: UUID) {
+        self.id = id
+        self.$comment.id = comment_id
+        self.$user.id = user_id
+    }
 }
 
 final class CommentUserDislike: Model, @unchecked Sendable {
@@ -25,4 +33,12 @@ final class CommentUserDislike: Model, @unchecked Sendable {
 
     @Parent(key: "user_id")
     var user: User
+
+    init() { }
+
+    init(id: UUID? = nil, comment_id: UUID, user_id: UUID) {
+        self.id = id
+        self.$comment.id = comment_id
+        self.$user.id = user_id
+    }
 }
