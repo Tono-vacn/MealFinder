@@ -4,7 +4,10 @@ import Vapor
 struct CommentController: RouteCollection {
   func boot(routes: RoutesBuilder) throws {
     let comments = routes.grouped("comments")
-    comments.post(use: fetchMoreComments)
+    comments.group(":commentID") { comment in
+      comment.get(use: fetchMoreComments)
+    }
+    // comments.post(use: fetchMoreComments)
     let tokenProtected = comments.grouped(UserToken.authenticator(), User.guardMiddleware())
     tokenProtected.group(":commentID") { comment in
       comment.post(use: createComment)
@@ -17,9 +20,8 @@ struct CommentController: RouteCollection {
 
   @Sendable
   func fetchMoreComments(req: Request) async throws -> [CommentDTO] {
-    let param = try req.content.decode(FetchCommentsRequest.self)
-    let comments = try await Comment.find(param.commentID, on: req.db)
-    guard let comment = comments else {
+    // let param = try req.content.decode(FetchCommentsRequest.self)
+    guard let comment = try await Comment.find(req.parameters.get("commentID"), on: req.db) else {
       throw Abort(.notFound)
     }
     let children = try await comment.$replies.query(on: req.db).all()

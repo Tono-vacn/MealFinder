@@ -17,7 +17,7 @@ struct PostController: RouteCollection {
         }
 
         let tokenProtected = posts.grouped(UserToken.authenticator(), User.guardMiddleware())
-        tokenProtected.post(use: create)
+        tokenProtected.post("create", use: create)
         tokenProtected.group(":postID") { post in
             // recipe.delete(use: delete)
             post.delete(use: delete)
