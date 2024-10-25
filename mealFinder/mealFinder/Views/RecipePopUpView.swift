@@ -13,6 +13,8 @@ struct RecipePopUpView: View {
     let onNext: () -> Void
     let onClose: () -> Void
     
+    @State private var navigateToDetail = false
+    
     var body: some View {
         VStack {
             
@@ -43,7 +45,7 @@ struct RecipePopUpView: View {
             .padding()
             
             Spacer()
-
+            
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
@@ -73,7 +75,7 @@ struct RecipePopUpView: View {
                 .padding(.horizontal)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: 300)
+            .frame(maxWidth: .infinity)
             
             GeometryReader { geometry in
                 HStack {
@@ -89,6 +91,8 @@ struct RecipePopUpView: View {
                     }.padding(10)
                     
                     Spacer()
+                    
+                    
                     
                     Button(action: onNext) {
                         Image(systemName: "chevron.right")
