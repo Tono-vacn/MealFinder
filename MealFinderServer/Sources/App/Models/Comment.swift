@@ -16,14 +16,26 @@ final class Comment: Model, @unchecked Sendable {
     @Field(key: "content")
     var content: String
 
-    @Field(key: "likes")
-    var likes: Int
+    // @Field(key: "likes")
+    // var likes: Int
 
-    @Field(key: "dislikes")
-    var dislikes: Int
+    // @Field(key: "dislikes")
+    // var dislikes: Int
 
-    @Parent(key: "post_id")
-    var post: Post
+    @Siblings(through: CommentUserLike.self, from: \.$comment, to: \.$user)
+    var likes: [User]
+
+    @Siblings(through: CommentUserDislike.self, from: \.$comment, to: \.$user)
+    var dislikes: [User]
+
+    @Field(key: "likes_count")
+    var likesCount: Int
+
+    @Field(key: "dislikes_count")
+    var dislikesCount: Int
+
+    @OptionalParent(key: "post_id")
+    var post: Post?
 
     // 可选的父评论（建立自引用关系）
     @OptionalParent(key: "parent_comment_id")
@@ -39,12 +51,14 @@ final class Comment: Model, @unchecked Sendable {
 
     init() { }
 
-    init(id: UUID? = nil, title: String, content: String, likes: Int, dislikes: Int, post_id: UUID? = nil, parentComment_id: UUID? = nil, user_id: UUID? = nil) {
+    init(id: UUID? = nil, title: String, content: String, post_id: UUID? = nil, parentComment_id: UUID? = nil, user_id: UUID? = nil) {
         self.id = id
         self.title = title
         self.content = content
-        self.likes = likes
-        self.dislikes = dislikes
+        // self.likes = []
+        // self.dislikes = []
+        self.likesCount = 0
+        self.dislikesCount = 0
         if let post_id = post_id {
             self.$post.id = post_id
         }
@@ -56,16 +70,18 @@ final class Comment: Model, @unchecked Sendable {
         }
     }
 
-    func toDTO() -> CommentDTO {
+    func toDTO(on db: Database) async throws -> CommentDTO {
+        let haveComments = try await self.$replies.query(on: db).count() > 0
         return CommentDTO(
             id: self.id,
             title: self.title,
             content: self.content,
-            likes: self.likes,
-            dislikes: self.dislikes,
+            likes: self.likesCount,
+            dislikes: self.dislikesCount,
             postId: self.$post.id,
             parentCommentId: self.$parentComment.id,
-            userId: self.$user.id
+            userId: self.$user.id,
+            haveComments: haveComments
         )
     }
     

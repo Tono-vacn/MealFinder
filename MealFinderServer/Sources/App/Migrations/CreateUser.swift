@@ -1,4 +1,5 @@
 import Fluent
+import Vapor
 
 struct CreateUser: AsyncMigration {
     func prepare(on database: Database) async throws {
