@@ -230,3 +230,17 @@
 
 
 
+### Migrations
+
+  ```Shell
+
+  vapor run migrate --revert
+
+  vapor run migrate --revert-all
+
+  ```
+
+  ```Shell
+  vapor run migrate --revert-all
+  vapor run migrate
+  ```

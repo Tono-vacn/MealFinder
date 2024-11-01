@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:final_proj}/MealFinderServer",
+      "name": "Debug App (MealFinderServer)",
+      "program": "${workspaceFolder:final_proj}/MealFinderServer/.build/debug/App",
+      "preLaunchTask": "swift: Build Debug App (MealFinderServer)"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:final_proj}/MealFinderServer",
+      "name": "Release App (MealFinderServer)",
+      "program": "${workspaceFolder:final_proj}/MealFinderServer/.build/release/App",
+      "preLaunchTask": "swift: Build Release App (MealFinderServer)"
+    }
+  ]
+}
