@@ -53,8 +53,8 @@ final class Post: Model, @unchecked Sendable {
     self.id = id
     self.title = title
     self.content = content
-    self.likes = []
-    self.dislikes = []
+    // self.likes = []
+    // self.dislikes = []
     self.likesCount = 0
     self.dislikesCount = 0
     self.createdAt = createdAt
@@ -72,7 +72,13 @@ final class Post: Model, @unchecked Sendable {
 }
 
 extension Post {
-    func toDTO() -> PostDTO {
+    func hasComments(on db: Database) async throws -> Bool {
+        let count = try await $comments.query(on: db).count()
+        return count > 0
+    }
+
+    func toDTO(on db: Database) async throws -> PostDTO {
+        let haveComments = try await self.hasComments(on: db)
         return PostDTO(
             id: self.id,
             title: self.title,
@@ -83,7 +89,7 @@ extension Post {
             updatedAt: self.updatedAt,
             userId: self.$user.id,
             recipeId: self.$recipe.id,
-            haveComments: !self.comments.isEmpty
+            haveComments: haveComments
         )
     }
 }

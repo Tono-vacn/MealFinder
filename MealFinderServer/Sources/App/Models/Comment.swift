@@ -34,8 +34,8 @@ final class Comment: Model, @unchecked Sendable {
     @Field(key: "dislikes_count")
     var dislikesCount: Int
 
-    @Parent(key: "post_id")
-    var post: Post
+    @OptionalParent(key: "post_id")
+    var post: Post?
 
     // 可选的父评论（建立自引用关系）
     @OptionalParent(key: "parent_comment_id")
@@ -55,8 +55,8 @@ final class Comment: Model, @unchecked Sendable {
         self.id = id
         self.title = title
         self.content = content
-        self.likes = []
-        self.dislikes = []
+        // self.likes = []
+        // self.dislikes = []
         self.likesCount = 0
         self.dislikesCount = 0
         if let post_id = post_id {
@@ -70,7 +70,8 @@ final class Comment: Model, @unchecked Sendable {
         }
     }
 
-    func toDTO() -> CommentDTO {
+    func toDTO(on db: Database) async throws -> CommentDTO {
+        let haveComments = try await self.$replies.query(on: db).count() > 0
         return CommentDTO(
             id: self.id,
             title: self.title,
@@ -80,7 +81,7 @@ final class Comment: Model, @unchecked Sendable {
             postId: self.$post.id,
             parentCommentId: self.$parentComment.id,
             userId: self.$user.id,
-            haveComments: !self.replies.isEmpty
+            haveComments: haveComments
         )
     }
     

@@ -25,7 +25,10 @@ struct CommentController: RouteCollection {
       throw Abort(.notFound)
     }
     let children = try await comment.$replies.query(on: req.db).all()
-    return children.map { $0.toDTO() }
+    // return children.map { $0.toDTO() }
+    return try await children.async.reduce(into: []) { (result, comment) in
+      result.append(try await comment.toDTO(on: req.db))
+    }
   }
 
   @Sendable
@@ -66,15 +69,26 @@ struct CommentController: RouteCollection {
         comment.likesCount = comment.likesCount - 1
         try await comment.save(on: db)
       }
-      return comment.toDTO()
-    }else{
+      return try await comment.toDTO(on: req.db)
+    }else if let existingDislike = try await CommentUserDislike.query(on: req.db).filter(\.$comment.$id == comment.id!).filter(\.$user.$id == curUser.id!).first() {
+      let like = CommentUserLike(comment_id: comment.id!, user_id: curUser.id!)
+      try await req.db.transaction { db in
+        try await existingDislike.delete(on: db)
+        comment.dislikesCount = comment.dislikesCount - 1
+        comment.likesCount = comment.likesCount + 1
+        try await like.save(on: db)
+        try await comment.save(on: db)
+      }
+      return try await comment.toDTO(on: req.db)
+    }
+    else{
       let like = CommentUserLike(comment_id: comment.id!, user_id: curUser.id!)
       try await req.db.transaction { db in
         try await like.save(on: db)
         comment.likesCount = comment.likesCount + 1
         try await comment.save(on: db)
       }
-      return comment.toDTO()
+      return try await comment.toDTO(on: req.db)
     } 
   }
 
@@ -91,15 +105,26 @@ struct CommentController: RouteCollection {
         comment.dislikesCount = comment.dislikesCount - 1
         try await comment.save(on: db)
       }
-      return comment.toDTO()
-    }else{
+      return try await comment.toDTO(on: req.db)
+    }else if let existingLike = try await CommentUserLike.query(on: req.db).filter(\.$comment.$id == comment.id!).filter(\.$user.$id == curUser.id!).first() {
+      let dislike = CommentUserDislike(comment_id: comment.id!, user_id: curUser.id!)
+      try await req.db.transaction { db in
+        try await existingLike.delete(on: db)
+        comment.likesCount = comment.likesCount - 1
+        comment.dislikesCount = comment.dislikesCount + 1
+        try await dislike.save(on: db)
+        try await comment.save(on: db)
+      }
+      return try await comment.toDTO(on: req.db)
+    }    
+    else{
       let dislike = CommentUserDislike(comment_id: comment.id!, user_id: curUser.id!)
       try await req.db.transaction { db in
         try await dislike.save(on: db)
         comment.dislikesCount = comment.dislikesCount + 1
         try await comment.save(on: db)
       }
-      return comment.toDTO()
+      return try await comment.toDTO(on: req.db)
     } 
   }
 

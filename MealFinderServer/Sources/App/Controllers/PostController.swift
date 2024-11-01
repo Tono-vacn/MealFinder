@@ -30,9 +30,16 @@ struct PostController: RouteCollection {
 
     }
 
+    // func loadComments(for post: Post, on db: Database) async throws -> [Comment] {
+    //   try await post.$comments.get(on: db)
+    // }
+
     @Sendable
     func index(req: Request) async throws -> [PostDTO] {
-        try await Post.query(on: req.db).all().map { $0.toDTO() }
+        return try await Post.query(on: req.db).all().async.reduce(into: []) { (result, post) in
+            result.append(try await post.toDTO(on: req.db))
+        }
+        //asynMap{ post in try await post.toDTO(on: req.db) }
     }
 
     @Sendable
@@ -41,13 +48,19 @@ struct PostController: RouteCollection {
         switch param.order {
           case .createdAt:
             let posts = try await Post.query(on: req.db).sort(\.$createdAt, param.direction == .desc ? .descending : .ascending).range(lower: param.index ?? 0, upper: (param.index ?? 0) + (param.offset ?? 10)).all()
-            return posts.map { $0.toDTO() }
+            return try await posts.async.reduce(into: []) { (result, post) in
+                result.append(try await post.toDTO(on: req.db))
+            }
           case .updatedAt:
             let posts = try await Post.query(on: req.db).sort(\.$updatedAt, param.direction == .desc ? .descending : .ascending).range(lower: param.index ?? 0, upper: (param.index ?? 0) + (param.offset ?? 10)).all()
-            return posts.map { $0.toDTO() }
+            return try await posts.async.reduce(into: []) { (result, post) in
+                result.append(try await post.toDTO(on: req.db))
+            }
           case .likes:
             let posts = try await Post.query(on: req.db).sort(\.$likesCount, param.direction == .desc ? .descending : .ascending).range(lower: param.index ?? 0, upper: (param.index ?? 0) + (param.offset ?? 10)).all()
-            return posts.map { $0.toDTO() }
+            return try await posts.async.reduce(into: []) { (result, post) in
+                result.append(try await post.toDTO(on: req.db))
+            }
           default:
             return []
         }
@@ -61,7 +74,7 @@ struct PostController: RouteCollection {
         guard let post = try await Post.find(req.parameters.get("postID"), on: req.db) else {
             throw Abort(.notFound)
         }
-        return post.toDTO()
+        return try await post.toDTO(on: req.db)
     } 
 
     @Sendable
@@ -69,24 +82,28 @@ struct PostController: RouteCollection {
         guard let post = try await Post.find(req.parameters.get("postID"), on: req.db) else {
             throw Abort(.notFound)
         }
-        return try await post.$comments.query(on: req.db).all().map { $0.toDTO() }
+        return try await post.$comments.query(on: req.db).all().async.reduce(into: []) { (result, comment) in
+            result.append(try await comment.toDTO(on: req.db))
+        }
     }
 
     @Sendable
     func create(req: Request) async throws -> HTTPStatus {
         let curUser = try req.auth.require(User.self)
         let rawPost = try req.content.decode(CreatePostRequest.self)
-        try await req.db.transaction { db in
+        do {try await req.db.transaction { db in
           let recipe = Recipe(title: rawPost.recipe.title, content: rawPost.recipe.content, ingredients: rawPost.recipe.ingredients)
           try await recipe.save(on: db)
           let post = Post(title: rawPost.title, content: rawPost.content, createdAt: Date(), updatedAt: Date(), userId: curUser.id, recipeId: recipe.id)
           try await post.save(on: db)
+        }} catch {
+          print(String(reflecting: error))
         }
         return .created
     }
 
     @Sendable 
-    func update(req: Request) async throws -> HTTPStatus {
+    func update(req: Request) async throws -> PostDTO {
       let curUser = try req.auth.require(User.self)
       guard let post = try await Post.find(req.parameters.get("postID"), on: req.db) else {
           throw Abort(.notFound)
@@ -102,7 +119,7 @@ struct PostController: RouteCollection {
         post.content = content
       }
       try await post.save(on: req.db)
-      return .noContent
+      return try await post.toDTO(on: req.db)
     } 
 
     @Sendable
@@ -134,15 +151,26 @@ struct PostController: RouteCollection {
           post.likesCount = post.likesCount - 1
           try await post.save(on: db)
         }
-        return post.toDTO()
-      }else{
+        return try await post.toDTO(on: req.db)
+      }else if let existingDislike = try await PostUserDislike.query(on: req.db).filter(\.$post.$id == post.id!).filter(\.$user.$id == curUser.id!).first() {
+        let like = PostUserLike(post_id: post.id!, user_id: curUser.id!)
+        try await req.db.transaction { db in
+          try await existingDislike.delete(on: db)
+          post.dislikesCount = post.dislikesCount - 1
+          post.likesCount = post.likesCount + 1
+          try await like.save(on: db)
+          try await post.save(on: db)
+        }
+        return try await post.toDTO(on: req.db)
+      }
+      else{
         let like = PostUserLike(post_id: post.id!, user_id: curUser.id!)
         try await req.db.transaction { db in
           try await like.save(on: db)
           post.likesCount = post.likesCount + 1
           try await post.save(on: db)
         }
-        return post.toDTO()
+        return try await post.toDTO(on: req.db)
       } 
 
       // let like = PostUserLike(postId: post.id!, userId: curUser.id!)
@@ -163,15 +191,26 @@ struct PostController: RouteCollection {
           post.dislikesCount = post.dislikesCount - 1
           try await post.save(on: db)
         }
-        return post.toDTO()
-      }else{
+        return try await post.toDTO(on: req.db)
+      }else if let existingLike = try await PostUserLike.query(on: req.db).filter(\.$post.$id == post.id!).filter(\.$user.$id == curUser.id!).first() {
+        let dislike = PostUserDislike(post_id: post.id!, user_id: curUser.id!)
+        try await req.db.transaction { db in
+          try await existingLike.delete(on: db)
+          post.likesCount = post.likesCount - 1
+          post.dislikesCount = post.dislikesCount + 1
+          try await dislike.save(on: db)
+          try await post.save(on: db)
+        }
+        return try await post.toDTO(on: req.db)
+      }
+      else{
         let dislike = PostUserDislike(post_id: post.id!, user_id: curUser.id!)
         try await req.db.transaction { db in
           try await dislike.save(on: db)
           post.dislikesCount = post.dislikesCount + 1
           try await post.save(on: db)
         }
-        return post.toDTO()
+        return try await post.toDTO(on: req.db)
       } 
     }
 
