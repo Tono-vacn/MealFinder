@@ -15,4 +15,5 @@ func routes(_ app: Application) throws {
     try app.register(collection: RecipeController())
     try app.register(collection: PostController())
     try app.register(collection: CommentController())
+    try app.register(collection: TaskRegister())
 }

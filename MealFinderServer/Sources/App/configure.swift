@@ -2,24 +2,49 @@ import NIOSSL
 import Fluent
 import FluentPostgresDriver
 import Vapor
+import SotoS3
+import Redis
 
 // configures your application
 public func configure(_ app: Application) async throws {
+    let _ = AppConfig.shared
     // uncomment to serve files from /Public folder
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     app.middleware.use(ErrorMiddleware.default(environment: app.environment))
     app.middleware.use(CORSMiddleware(configuration: .default()))
 
     app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(
-        hostname: Environment.get("DATABASE_HOST") ?? "localhost",
-        port: Environment.get("DATABASE_PORT").flatMap(Int.init(_:)) ?? SQLPostgresConfiguration.ianaPortNumber,
-        username: Environment.get("DATABASE_USERNAME") ?? "vapor_username",
-        password: Environment.get("DATABASE_PASSWORD") ?? "vapor_password",
-        database: Environment.get("DATABASE_NAME") ?? "vapor_database",
+        hostname: AppConfig.shared.postgresHostName,
+        port: AppConfig.shared.postgresPort,
+        username: AppConfig.shared.postgresUsername,
+        password: AppConfig.shared.postgresPassword,
+        database: AppConfig.shared.postgresDatabase,
         // tls: .prefer(try .init(configuration: .clientDefault))
         tlsConfiguration: .forClient(certificateVerification: .none)
         )
     ), as: .psql)
+
+
+    let awsClient = AWSClient(
+        credentialProvider: .static(accessKeyId: AppConfig.shared.awsAccessKeyID,
+                                     secretAccessKey: AppConfig.shared.awsSecretAccessKey),
+                                     httpClientProvider: .shared(app.http.client.shared)
+    )
+    app.aws.client = awsClient
+
+    let s3 = S3(client: awsClient, region: .useast2)
+
+    app.aws.s3 = s3
+
+    app.redis.configuration = try RedisConfiguration(
+        hostname: AppConfig.shared.redisHostName,
+        port: AppConfig.shared.redisPort,
+        password: AppConfig.shared.redisPassword
+    )
+
+
+    app.lifecycle.use(ShutdownAWSClient(awsClient: awsClient))
+
   
     // app.migrations.add(CreateTodo())
     app.migrations.add(CreateUser())
@@ -34,4 +59,13 @@ public func configure(_ app: Application) async throws {
 
     // register routes
     try routes(app)
+}
+
+// Helper to shutdown AWS client
+struct ShutdownAWSClient: LifecycleHandler {
+    let awsClient: AWSClient
+    
+    func shutdown(_ application: Application) throws {
+        try awsClient.syncShutdown()
+    }
 }
