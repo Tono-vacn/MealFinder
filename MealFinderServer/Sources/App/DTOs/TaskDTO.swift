@@ -39,6 +39,10 @@ struct TaskDTO: Content, RESPValueConvertible {
             .bulkString(ByteBuffer(string: url))
         ])
     }
+
+    func toString() -> String {
+        "\(taskID.uuidString) \(key.uuidString) \(url)"
+    }
 }
 
 // submit a picture to create a task

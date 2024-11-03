@@ -2,6 +2,7 @@ import Fluent
 import SotoS3
 import Vapor
 import Redis
+import RabbitMq
 
 struct TaskRegister: RouteCollection {
   func boot(routes: RoutesBuilder) throws {
@@ -34,9 +35,12 @@ struct TaskRegister: RouteCollection {
     )
     let res = try await s3.putObject(uploadRequest)
     let task = TaskDTO(taskID: UUID(), key: key, url: "http://\(bucket).s3.amazonaws.com/\(key.uuidString)")
-    let channelName: RedisChannelName = "\(AppConfig.shared.redisChannel)"
+    // let channelName: RedisChannelName = "\(AppConfig.shared.redisChannel)"
 
-    _ = try await req.redis.publish(task, to: channelName).get()
+    // _ = try await req.redis.publish(task, to: channelName).get()
+
+    try await req.rabbitMQ.publisher.publish(task.toString())
+
     return task
   }
 

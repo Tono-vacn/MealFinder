@@ -4,6 +4,7 @@ import FluentPostgresDriver
 import Vapor
 import SotoS3
 import Redis
+import RabbitMq
 
 // configures your application
 public func configure(_ app: Application) async throws {
@@ -45,7 +46,14 @@ public func configure(_ app: Application) async throws {
 
     app.lifecycle.use(ShutdownAWSClient(awsClient: awsClient))
 
-  
+    // let mqConnection = RabbitMq.BasicConnection(AppConfig.shared.rabbitMQUrl)
+
+    app.rabbitMQ.connection = RabbitMq.BasicConnection(AppConfig.shared.rabbitMQUrl)
+
+    try await app.rabbitMQ.connection.connect()
+
+    app.rabbitMQ.publisher = Publisher(app.rabbitMQ.connection, "MealFinderExchange")
+
     // app.migrations.add(CreateTodo())
     app.migrations.add(CreateUser())
     app.migrations.add(CreateUserToken())
