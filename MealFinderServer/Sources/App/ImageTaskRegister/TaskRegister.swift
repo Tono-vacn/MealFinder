@@ -9,7 +9,7 @@ struct TaskRegister: RouteCollection {
     let tasks = routes.grouped("tasks")
     let tokenProtected = tasks.grouped(UserToken.authenticator(), User.guardMiddleware())
     tokenProtected.group(":taskID") { task in
-      // task.get(use: checkTask)
+      task.get(use: checkTask)
     }
     tokenProtected.post(use: createTask)
   }
@@ -50,8 +50,11 @@ struct TaskRegister: RouteCollection {
     this function will check the result in redis to see if the task is completed
     */
 
-    let checkTaskRequest = try req.content.decode(CheckTaskRequest.self)  
-    let taskID = checkTaskRequest.taskID
+    // let checkTaskRequest = try req.content.decode(CheckTaskRequest.self)  
+    // let taskID = checkTaskRequest.taskID
+    guard let taskID = req.parameters.get("taskID", as: UUID.self) else {
+      throw Abort(.badRequest)
+    }
     let taskVal = try await req.redis.get("\(taskID.uuidString)").get()
 
     switch taskVal {
