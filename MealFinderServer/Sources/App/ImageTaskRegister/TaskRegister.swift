@@ -44,9 +44,33 @@ struct TaskRegister: RouteCollection {
     return task
   }
 
-  // @Sendable
-  // func checkTask(req: Request) async throws -> CheckTaskResponse {
+  @Sendable
+  func checkTask(req: Request) async throws -> CheckTaskResponse {
+    /*
+    this function will check the result in redis to see if the task is completed
+    */
 
-  // }
+    let checkTaskRequest = try req.content.decode(CheckTaskRequest.self)  
+    let taskID = checkTaskRequest.taskID
+    let taskVal = try await req.redis.get("\(taskID.uuidString)").get()
+
+    switch taskVal {
+      case .null:
+        return CheckTaskResponse(taskID: taskID, status: .pending, result: nil)
+      case .simpleString(let result):
+        let resultString = result.getString(at: result.readerIndex, length: result.readableBytes) ?? ""
+        return CheckTaskResponse(taskID: taskID, status: .completed, result: [resultString])
+      case .array(let result):
+        let resArray = result.map { res in 
+          guard case .simpleString(let strVal) = res else {
+            return ""
+          }
+          return strVal.getString(at: strVal.readerIndex, length: strVal.readableBytes) ?? ""
+        }
+        return CheckTaskResponse(taskID: taskID, status: .completed, result: resArray)
+      default:
+        return CheckTaskResponse(taskID: taskID, status: .pending, result: nil)
+    }
+  }
 
 }
