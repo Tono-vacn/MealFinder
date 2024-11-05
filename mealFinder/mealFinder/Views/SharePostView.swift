@@ -48,22 +48,21 @@ struct SharePostView: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
 
-                TextField("Ingredients (comma separated)", text: $ingredients)
+                TextField("Ingredients", text: $ingredients)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
 
                 Button(action: {
-                    // 将用户输入的食材转换为数组
                     let ingredientsArray = ingredients.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
 
-                    // 创建 CreateRecipeRequest 和 CreatePostRequest
+            
                     let recipeRequest = CreateRecipeRequest(title: recipeTitle, content: recipeContent, ingredients: ingredientsArray)
                     let postRequest = CreatePostRequest(title: postTitle, content: postContent, recipe: recipeRequest)
 
-                    // 调用 onSubmit 回调
+ 
                     onSubmit(postRequest)
 
-                    // 关闭弹窗
+
                     presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("Submit Post")

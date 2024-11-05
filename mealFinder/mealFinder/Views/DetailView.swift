@@ -12,18 +12,20 @@ struct DetailView: View {
     let recipeService = RecipeService()
     @State private var instructions: String = "Loading instructions..."
     @State private var errorMessage: String? = nil
+    @State private var showSharePostView = false
+    
     
     var body: some View {
         VStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-
+                    
                     Text(recipe.title)
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .padding(.top)
                     
-
+                    
                     AsyncImage(url: URL(string: recipe.image)) { image in
                         image
                             .resizable()
@@ -36,17 +38,17 @@ struct DetailView: View {
                     .padding(.vertical)
                     
                     ScrollView {
-                                    Text(instructions) // Displays instructions or loading message
-                                        .padding()
-                                }
+                        Text(instructions) // Displays instructions or loading message
+                            .padding()
+                    }
                 }
                 .padding()
             }
             
-
+            
             Spacer()
             
-
+            
             Button(action: saveRecipe) {
                 HStack {
                     Image(systemName: "bookmark.fill")
@@ -65,7 +67,7 @@ struct DetailView: View {
         .navigationTitle("Cooking steps")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-
+            
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: shareRecipe) {
                     Image(systemName: "square.and.arrow.up")
@@ -75,22 +77,27 @@ struct DetailView: View {
             }
         }
         .onAppear {
-                        // Fetch instructions when DetailView appears
+            // Fetch instructions when DetailView appears
             recipeService.getRecipeInstructions(recipeId: recipe.id) {
-                                instructions in
-                                DispatchQueue.main.async {
-                                    self.instructions = instructions
-                                }
-                            }
-                    }
+                instructions in
+                DispatchQueue.main.async {
+                    self.instructions = instructions
+                }
+            }
+        }
+        .sheet(isPresented: $showSharePostView) {
+            SharePostView(recipe: recipe) { postRequest in
+                submitPostToBackend(postRequest)
+            }
+        }
     }
     
-
+    
     func saveRecipe() {
         print("Recipe saved!")
     }
     
     func shareRecipe() {
-        print("Recipe shared!")
+        showSharePostView = true
     }
 }
