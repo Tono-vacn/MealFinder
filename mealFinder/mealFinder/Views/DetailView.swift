@@ -13,6 +13,7 @@ struct DetailView: View {
     @State private var instructions: String = "Loading instructions..."
     @State private var errorMessage: String? = nil
     let defaultInstructions: String = "No instructions available."
+    @State private var showSharePostView = false
     
     var body: some View {
         VStack {
@@ -73,6 +74,11 @@ struct DetailView: View {
                         .font(.title2)
                         .foregroundColor(.blue)
                 }
+            }
+        }
+        .sheet(isPresented: $showSharePostView) {
+            SharePostView(recipe: recipe) { postRequest in
+                //submitPostToBackend(postRequest)
             }
         }
 //        .onAppear {
