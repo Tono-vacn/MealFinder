@@ -18,13 +18,13 @@ struct DetailView: View {
         VStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-
+                    
                     Text(recipe.title)
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .padding(.top)
                     
-
+                    
                     AsyncImage(url: URL(string: recipe.image)) { image in
                         image
                             .resizable()
@@ -44,10 +44,10 @@ struct DetailView: View {
                 .padding()
             }
             
-
+            
             Spacer()
             
-
+            
             Button(action: saveRecipe) {
                 HStack {
                     Image(systemName: "bookmark.fill")
@@ -66,7 +66,7 @@ struct DetailView: View {
         .navigationTitle("Cooking steps")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-
+            
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: shareRecipe) {
                     Image(systemName: "square.and.arrow.up")
@@ -86,12 +86,12 @@ struct DetailView: View {
 //                    }
     }
     
-
+    
     func saveRecipe() {
         print("Recipe saved!")
     }
     
     func shareRecipe() {
-        print("Recipe shared!")
+        showSharePostView = true
     }
 }
