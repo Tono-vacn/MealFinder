@@ -12,6 +12,7 @@ struct DetailView: View {
     let recipeService = RecipeService()
     @State private var instructions: String = "Loading instructions..."
     @State private var errorMessage: String? = nil
+    let defaultInstructions: String = "No instructions available."
     
     var body: some View {
         VStack {
@@ -36,7 +37,7 @@ struct DetailView: View {
                     .padding(.vertical)
                     
                     ScrollView {
-                                    Text(instructions) // Displays instructions or loading message
+                        Text(recipe.description ?? defaultInstructions) // Displays instructions or loading message
                                         .padding()
                                 }
                 }
@@ -74,15 +75,15 @@ struct DetailView: View {
                 }
             }
         }
-        .onAppear {
-                        // Fetch instructions when DetailView appears
-            recipeService.getRecipeInstructions(recipeId: recipe.id) {
-                                instructions in
-                                DispatchQueue.main.async {
-                                    self.instructions = instructions
-                                }
-                            }
-                    }
+//        .onAppear {
+//                        // Fetch instructions when DetailView appears
+//            recipeService.getRecipeInstructions(recipeId: recipe.id) {
+//                                instructions in
+//                                DispatchQueue.main.async {
+//                                    self.instructions = instructions
+//                                }
+//                            }
+//                    }
     }
     
 
