@@ -26,6 +26,7 @@ struct mealFinderApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .modelContainer(for: [RecipeData.self, IngredientData.self])
         }
 //        .modelContainer(sharedModelContainer)
     }
