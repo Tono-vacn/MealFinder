@@ -9,6 +9,9 @@ import SwiftUI
 
 struct DetailView: View {
     let recipe: Recipe
+    let recipeService = RecipeService()
+    @State private var instructions: String = "Loading instructions..."
+    @State private var errorMessage: String? = nil
     
     var body: some View {
         VStack {
@@ -31,6 +34,11 @@ struct DetailView: View {
                     .frame(height: 300)
                     .cornerRadius(10)
                     .padding(.vertical)
+                    
+                    ScrollView {
+                                    Text(instructions) // Displays instructions or loading message
+                                        .padding()
+                                }
                 }
                 .padding()
             }
@@ -66,6 +74,15 @@ struct DetailView: View {
                 }
             }
         }
+        .onAppear {
+                        // Fetch instructions when DetailView appears
+            recipeService.getRecipeInstructions(recipeId: recipe.id) {
+                                instructions in
+                                DispatchQueue.main.async {
+                                    self.instructions = instructions
+                                }
+                            }
+                    }
     }
     
 
