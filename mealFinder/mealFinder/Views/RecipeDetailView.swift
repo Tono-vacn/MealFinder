@@ -38,6 +38,36 @@ struct RecipeDetailView: View {
                     .cornerRadius(10)
                     .padding(.vertical)
                     
+                    Text("Ingredients")
+                        .font(.headline)
+                        .padding(.top)
+                    
+                    VStack(alignment: .leading, spacing: 10) {
+                        
+                        if !recipe.usedIngredients.isEmpty {
+                            
+                            ForEach(recipe.usedIngredients, id: \.id) { ingredient in
+                                Text("• \(ingredient.original)")
+                                    .font(.body)
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                        
+                        if !recipe.missedIngredients.isEmpty {
+                            
+                            ForEach(recipe.missedIngredients, id: \.id) { ingredient in
+                                Text("• \(ingredient.original)")
+                                    .font(.body)
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    
+                    Text("Instructions")
+                        .font(.headline)
+                        .padding(.top)
+                    
                     ScrollView {
                         Text(recipe.descriptionText ?? defaultInstructions) // Displays instructions or loading message
                             .padding()
