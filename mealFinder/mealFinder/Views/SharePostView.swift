@@ -11,10 +11,7 @@ struct SharePostView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var postTitle: String
     @State private var postContent: String
-    @State private var recipeTitle: String
-    @State private var recipeContent: String
-    @State private var ingredients: String
-
+    
     let recipe: Recipe
     let onSubmit: (CreatePostRequest) -> Void
 
@@ -22,46 +19,72 @@ struct SharePostView: View {
         self.recipe = recipe
         self.onSubmit = onSubmit
 
-        _postTitle = State(initialValue: recipe.title)
-        _postContent = State(initialValue: "Delicious recipe using \(recipe.title)")
-        _recipeTitle = State(initialValue: recipe.title)
-        _recipeContent = State(initialValue: "Here are the steps to make \(recipe.title).")
-        _ingredients = State(initialValue: recipe.usedIngredients.map { $0.name }.joined(separator: ", "))
+        _postTitle = State(initialValue: "")
+        _postContent = State(initialValue: "")
     }
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
+            VStack() {
+                Spacer()
+                // Post Title (Editable)
                 TextField("Post Title", text: $postTitle)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
 
-                TextField("Post Content", text: $postContent)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                // Post Content (Editable)
+                TextEditor(text: $postContent)
+                    .frame(height: 300)
+                    .padding(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.5))
+                    )
+//                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(8)
                     .padding()
 
-                TextField("Recipe Title", text: $recipeTitle)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
+                // Recipe Title (Read-only)
+                VStack(alignment: .leading) {
+                    Text("Relevant Recipe:")
+                        .font(.headline)
+                    Text(recipe.title)
+                        .padding()
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(8)
+                }
+                .padding(.horizontal)
 
-                TextField("Recipe Content", text: $recipeContent)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-
-                TextField("Ingredients", text: $ingredients)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-
+//                // Recipe Content (Read-only)
+//                VStack(alignment: .leading) {
+//                    Text("Recipe Content:")
+//                        .font(.headline)
+//                    Text(recipe.description ?? "No content available")
+//                        .padding()
+//                        .background(Color.gray.opacity(0.2))
+//                        .cornerRadius(8)
+//                }
+//                .padding(.horizontal)
+//
+//                // Ingredients (Read-only)
+//                VStack(alignment: .leading) {
+//                    Text("Ingredients:")
+//                        .font(.headline)
+//                    Text(recipe.usedIngredients.map { $0.name }.joined(separator: ", "))
+//                        .padding()
+//                        .background(Color.gray.opacity(0.2))
+//                        .cornerRadius(8)
+//                }
+                .padding(.horizontal)
+                Spacer()
+                // Submit Button
                 Button(action: {
-                    let ingredientsArray = ingredients.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                    let ingredientsArray = recipe.usedIngredients.map { $0.name }
 
-            
-                    let recipeRequest = CreateRecipeRequest(title: recipeTitle, content: recipeContent, ingredients: ingredientsArray)
+                    let recipeRequest = CreateRecipeRequest(title: recipe.title, content: recipe.description ?? "", ingredients: ingredientsArray)
                     let postRequest = CreatePostRequest(title: postTitle, content: postContent, recipe: recipeRequest)
 
- 
                     onSubmit(postRequest)
-
 
                     presentationMode.wrappedValue.dismiss()
                 }) {
@@ -82,4 +105,3 @@ struct SharePostView: View {
         }
     }
 }
-

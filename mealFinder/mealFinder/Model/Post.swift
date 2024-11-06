@@ -7,6 +7,18 @@
 
 import Foundation
 
+struct Post: Identifiable, Codable {
+    var id: String
+    var title: String
+    var content: String
+    var likes: Int
+    var dislikes: Int
+    var createdAt: String
+    var updatedAt: String
+    var userId: String?
+    var recipeId: String?
+    var haveComments: Bool
+}
 
 struct CreatePostRequest: Codable {
     var title: String
