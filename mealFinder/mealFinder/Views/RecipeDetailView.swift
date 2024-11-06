@@ -25,8 +25,7 @@ struct RecipeDetailView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .padding(.top)
-                    
-                    
+                                    
                     AsyncImage(url: URL(string: recipe.image)) { image in
                         image
                             .resizable()
@@ -92,7 +91,9 @@ struct RecipeDetailView: View {
             }
         }
         .sheet(isPresented: $showSharePostView) {
-            
+            SharePostView(recipe: Recipe(from: recipe)) { postRequest in
+                // submitPostToBackend(postRequest)
+            }
         }
     }
     

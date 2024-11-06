@@ -16,6 +16,17 @@ struct Recipe: Decodable {
     let usedIngredients: [Ingredient]
     let missedIngredients: [Ingredient]
     var description: String?
+    
+    init(from recipeData: RecipeData) {
+            self.id = recipeData.id
+            self.title = recipeData.title
+            self.image = recipeData.image
+            self.usedIngredientCount = recipeData.usedIngredientCount
+            self.missedIngredientCount = recipeData.missedIngredientCount
+            self.usedIngredients = recipeData.usedIngredients.map { Ingredient(from: $0) }
+            self.missedIngredients = recipeData.missedIngredients.map { Ingredient(from: $0) }
+            self.description = recipeData.descriptionText
+        }
 }
 
 struct Ingredient: Decodable {
@@ -25,6 +36,15 @@ struct Ingredient: Decodable {
     let unit: String
     let original: String
     let image: String
+    
+    init(from ingredientData: IngredientData) {
+            self.id = ingredientData.id
+            self.name = ingredientData.name
+            self.amount = ingredientData.amount
+            self.unit = ingredientData.unit
+            self.original = ingredientData.original
+            self.image = ingredientData.image
+        }
 }
 
 struct Instruction: Decodable{
