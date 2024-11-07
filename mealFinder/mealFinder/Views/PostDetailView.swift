@@ -93,6 +93,7 @@ struct PostDetailView: View {
                 }
             }
         }
+        .background(HideTabBarView())
     }
     func likePost() {
         isProcessingLike = true
