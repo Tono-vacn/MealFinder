@@ -10,8 +10,9 @@ import SwiftUI
 struct ForumView: View {
     @State private var posts: [Post] = []
     @State private var isLoading = true
-    @State private var errorMessage: String? 
-
+    @State private var errorMessage: String?
+    @State private var currentUserId: String?
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -24,7 +25,7 @@ struct ForumView: View {
                         .padding()
                 } else {
                     List(posts) { post in
-                        NavigationLink(destination: PostDetailView(post: post)) {
+                        NavigationLink(destination: PostDetailView(post: post, currentUserId: currentUserId ?? "")) {
                             VStack(alignment: .leading) {
                                 Text(post.title)
                                     .font(.headline)
@@ -45,11 +46,25 @@ struct ForumView: View {
             }
             .navigationTitle("Forum")
             .onAppear {
+                fetchCurrentUserId()
                 loadPosts()
             }
         }
     }
-
+    
+    func fetchCurrentUserId() {
+        UserService.shared.fetchCurrentUser { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let userId):
+                    self.currentUserId = userId
+                case .failure(let error):
+                    self.errorMessage = "Failed to fetch user ID: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
     func loadPosts() {
         PostService.shared.fetchPosts { result in
             DispatchQueue.main.async {
@@ -63,7 +78,7 @@ struct ForumView: View {
             }
         }
     }
-
+    
     func formatDate(_ isoDate: String) -> String {
         let formatter = ISO8601DateFormatter()
         if let date = formatter.date(from: isoDate) {

@@ -132,7 +132,7 @@ struct InstructionIngredient: Decodable{
 //    }
 //}
 class RecipeService {
-    private let apiKey = "eb7eed994fc64755be038c4e3f7cc3c6"
+    private let apiKey = "93a2224a02154eefb3fb06b594e4b993"
     private let baseURL = "https://api.spoonacular.com/recipes/"
     var recipes: [Recipe] = []
     
