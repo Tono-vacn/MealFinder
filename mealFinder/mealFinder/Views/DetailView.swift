@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct DetailView: View {
     let recipe: Recipe
@@ -14,9 +15,12 @@ struct DetailView: View {
     @State private var errorMessage: String? = nil
     let defaultInstructions: String = "No instructions available."
     @State private var showSharePostView = false
+    @State private var isRecipeSaved = false
     
     @Environment(\.modelContext) private var modelContext
-    
+    @Query var savedRecipes: [RecipeData]
+
+        
     var body: some View {
         VStack {
             ScrollView {
@@ -50,21 +54,30 @@ struct DetailView: View {
             
             Spacer()
             
-            
-            Button(action: saveRecipe) {
-                HStack {
-                    Image(systemName: "bookmark.fill")
-                    Text("Save")
-                        .fontWeight(.bold)
-                }
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                .padding(.horizontal)
-                .padding(.bottom)
-            }
+            if isRecipeAlreadySaved(){
+                Text("Recipe already saved")
+                                    .font(.headline)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.gray.opacity(0.2))
+                                    .cornerRadius(10)
+                                    .padding(.horizontal)
+                                    .padding(.bottom)
+            } else {
+                Button(action: saveRecipe) {
+                    HStack {
+                        Image(systemName: "bookmark.fill")
+                        Text("Save")
+                            .fontWeight(.bold)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+                    .padding(.bottom)
+                }}
         }
         .navigationTitle("Cooking steps")
         .navigationBarTitleDisplayMode(.inline)
@@ -94,7 +107,9 @@ struct DetailView: View {
         //                    }
     }
     
-    
+    func isRecipeAlreadySaved()-> Bool {
+        return savedRecipes.contains(where: { $0.id == recipe.id })
+    }
     func saveRecipe() {
         let usedIngredientData = recipe.usedIngredients.map { ingredient in
             IngredientData(
