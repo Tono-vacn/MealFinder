@@ -14,7 +14,7 @@ struct PostDetailView: View {
     @State private var isProcessingDislike = false
     @State private var errorMessage: String? = nil
     let currentUserId: String
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
     init(post: Post, currentUserId: String) {
         _post = State(initialValue: post)
@@ -145,7 +145,8 @@ struct PostDetailView: View {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    presentationMode.wrappedValue.dismiss() 
+                    print("delete successfully")
+                    dismiss()
                 case .failure(let error):
                     errorMessage = "Failed to delete post: \(error.localizedDescription)"
                 }

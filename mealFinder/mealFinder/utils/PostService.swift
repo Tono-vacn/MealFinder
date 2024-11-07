@@ -116,7 +116,7 @@ class PostService {
                 return
             }
             
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 204 {
                 completion(.success(()))
             } else {
                 completion(.failure(URLError(.badServerResponse)))
