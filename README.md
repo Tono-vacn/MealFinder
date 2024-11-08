@@ -1,5 +1,38 @@
 # MealFinderServer README
 
+## Migrations
+
+  ```Shell
+
+  vapor run migrate --revert
+
+  vapor run migrate --revert-all
+
+  ```
+
+  ```Shell
+  vapor run migrate --revert-all
+  vapor run migrate
+  ```
+
+
+## Design of Image Recognition Service
+
+
+  - Microservice: Decoupled RESTful API service with Machine Learning model for image recognition
+  - 3 phase:
+    - Task registration (By Swift Web Server): save image to S3 bucket and register task to RabbitMQ
+    - Task processing (By Machine Learning Model Server): consume task from RabbitMQ, download image from S3 bucket, process image with ML model, save result to Redis
+    - Task result query (By Swift Web Server): query result from Redis by task id
+  - Technologies:
+    - Swift Web Server: Vapor
+    - Machine Learning Model Server: Python Flask with PyTorch ? (not implemented)
+    - Message Queue: RabbitMQ
+    - Image Storage: S3
+    - Cache: Redis
+  - Basic Structure:
+   ![Image Recognition Service](./image.png)
+
 ## API Endpoints
 
 ### Authentication and User Management
@@ -226,21 +259,3 @@
 
 - Delete comment
 - token required
-
-
-
-
-### Migrations
-
-  ```Shell
-
-  vapor run migrate --revert
-
-  vapor run migrate --revert-all
-
-  ```
-
-  ```Shell
-  vapor run migrate --revert-all
-  vapor run migrate
-  ```

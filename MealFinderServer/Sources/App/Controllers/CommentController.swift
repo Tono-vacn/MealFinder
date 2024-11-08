@@ -32,7 +32,7 @@ struct CommentController: RouteCollection {
   }
 
   @Sendable
-  func createComment(req: Request) async throws -> HTTPStatus {
+  func createComment(req: Request) async throws -> CreateCommentResponse {
     let curUser = try req.auth.require(User.self)
     guard let curComment = try await Comment.find(req.parameters.get("commentID"), on: req.db) else {
         throw Abort(.notFound)
@@ -40,7 +40,7 @@ struct CommentController: RouteCollection {
     let rawComment = try req.content.decode(CreateCommentRequest.self)
     let comment = Comment(title: rawComment.title, content: rawComment.content, parentComment_id: curComment.id, user_id: curUser.id)
     try await comment.save(on: req.db)
-    return .created
+    return CreateCommentResponse(status: .success, comment: try await comment.toDTO(on: req.db))
   }
 
   @Sendable
