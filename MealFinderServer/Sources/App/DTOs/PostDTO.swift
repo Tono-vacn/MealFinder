@@ -14,6 +14,11 @@ enum PostDirection: String, Content {
     case desc = "desc"
 }
 
+enum PostCreateStatus: String, Content {
+    case success = "success"
+    case fail = "fail"
+}
+
 struct PostDTO: Content {
     var id: UUID?
     var title: String
@@ -25,6 +30,18 @@ struct PostDTO: Content {
     var userId: UUID?
     var recipeId: UUID?
     var haveComments: Bool
+}
+
+struct PostDTOInline: Content {
+    var id: UUID?
+    var title: String
+    var content: String
+    var likes: Int
+    var dislikes: Int
+    var createdAt: Date
+    var updatedAt: Date
+    var userId: UUID?
+    var recipe: RecipeDTO
 }
 
 // extension PostDTO {
@@ -59,4 +76,9 @@ struct IndexByOrderWithQuantityRequest: Content {
     var index: Int?
     var offset: Int?
     var direction: PostDirection?
+}
+
+struct CreatePostResponse: Content {
+    var status: PostCreateStatus
+    var post: PostDTOInline?
 }

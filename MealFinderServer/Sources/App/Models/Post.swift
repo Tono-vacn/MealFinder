@@ -1,5 +1,6 @@
 import Fluent
 import Foundation
+import Vapor
 
 final class Post: Model, @unchecked Sendable {
   static let schema = "posts"
@@ -90,6 +91,23 @@ extension Post {
             userId: self.$user.id,
             recipeId: self.$recipe.id,
             haveComments: haveComments
+        )
+    }
+
+    func toDTOInline(on db: Database) async throws -> PostDTOInline {
+        guard let recipe = try await self.$recipe.query(on: db).first() else {
+            throw Abort(.internalServerError)
+        }
+        return PostDTOInline(
+            id: self.id,
+            title: self.title,
+            content: self.content,
+            likes: self.likesCount,
+            dislikes: self.dislikesCount,
+            createdAt: self.createdAt,
+            updatedAt: self.updatedAt,
+            userId: self.$user.id,
+            recipe: recipe.toDTO()
         )
     }
 }
