@@ -38,8 +38,10 @@ struct TaskRegister: RouteCollection {
     // let channelName: RedisChannelName = "\(AppConfig.shared.redisChannel)"
 
     // _ = try await req.redis.publish(task, to: channelName).get()
-
-    try await req.rabbitMQ.publisher.publish(task.toString())
+    guard let taskString = try task.toString() else {
+      throw Abort(.internalServerError)
+    }
+    try await req.rabbitMQ.publisher.publish(taskString, routingKey: "task")
 
     return task
   }

@@ -259,3 +259,39 @@
 
 - Delete comment
 - token required
+
+### Task Registration
+
+#### POST /tasks
+
+- Register a new task with an image
+- token required
+- Request Body:
+  ```swift
+  struct CreateTaskRequest: Content {
+      var image: File
+  }
+  ```
+- Response Body:
+  ```swift
+  struct TaskDTO: Content {
+    var taskID: UUID
+    var key: UUID
+    var url: String 
+  }
+  ```
+
+#### GET /tasks/:id
+
+- Get task info by id
+- token required
+- Request Body: 
+  ```swift
+  struct CheckTaskResponse: Content {
+    var taskID: UUID
+    var status: TaskStatus
+    var result: [String]? // the result of the task
+  }
+  ```
+
+

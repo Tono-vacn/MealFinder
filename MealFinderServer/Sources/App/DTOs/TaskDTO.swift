@@ -40,8 +40,10 @@ struct TaskDTO: Content, RESPValueConvertible {
         ])
     }
 
-    func toString() -> String {
-        "\(taskID.uuidString) \(key.uuidString) \(url)"
+    func toString() throws -> String? {
+        // "\(taskID.uuidString) \(key.uuidString) \(url)"
+        let jsonData = try JSONEncoder().encode(self)
+        return String(data: jsonData, encoding: .utf8)
     }
 }
 
