@@ -81,22 +81,30 @@ class PostService {
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
+                print("Request error: \(error)")
                 completion(.failure(error))
                 return
             }
-            
+
+            if let httpResponse = response as? HTTPURLResponse {
+                print("HTTP Status Code: \(httpResponse.statusCode)")
+            }
+
             guard let data = data else {
+                print("No data received")
                 completion(.failure(URLError(.badServerResponse)))
                 return
             }
-            
+
             do {
                 let post = try JSONDecoder().decode(Post.self, from: data)
                 completion(.success(post))
             } catch {
+                print("Decoding error: \(error)")
                 completion(.failure(error))
             }
         }.resume()
+
     }
     
     // MARK: delete a post

@@ -95,6 +95,7 @@ struct PostDetailView: View {
         }
         .background(HideTabBarView())
     }
+    
     func likePost() {
         isProcessingLike = true
         errorMessage = nil
@@ -104,6 +105,7 @@ struct PostDetailView: View {
                 switch result {
                 case .success:
                     refreshPost()
+                    //print("refreshed")
                 case .failure(let error):
                     errorMessage = error.localizedDescription
                 }
@@ -129,12 +131,16 @@ struct PostDetailView: View {
     }
     
     func refreshPost() {
+        
         PostService.shared.fetchPost(by: post.id) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let updatedPost):
                     post = updatedPost
+                    print(post.likes)
+                    print("refresh succ")
                 case .failure(let error):
+                    print("refresh fail")
                     errorMessage = "Failed to refresh post: \(error.localizedDescription)"
                 }
             }

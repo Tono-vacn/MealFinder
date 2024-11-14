@@ -16,8 +16,15 @@ struct Post: Identifiable, Codable {
     var createdAt: String
     var updatedAt: String
     var userId: String?
-    var recipeId: String?
+    var recipe: Recipee?
     var haveComments: Bool
+}
+
+struct Recipee: Codable {
+    var id: String
+    var title: String
+    var content: String
+    var ingredients: [String]
 }
 
 struct CreatePostRequest: Codable {

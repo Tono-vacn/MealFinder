@@ -39,7 +39,7 @@ func submitPostToBackend(_ postRequest: CreatePostRequest) {
 
        
         if let httpResponse = response as? HTTPURLResponse {
-            if httpResponse.statusCode == 201 {
+            if httpResponse.statusCode == 200 {
                 print("Post created successfully!")
             } else {
                 print("Failed to create post. Status code: \(httpResponse.statusCode)")
