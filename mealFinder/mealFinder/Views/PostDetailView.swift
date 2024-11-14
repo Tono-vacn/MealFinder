@@ -13,6 +13,7 @@ struct PostDetailView: View {
     @State private var isProcessingLike = false
     @State private var isProcessingDislike = false
     @State private var errorMessage: String? = nil
+
     let currentUserId: String
     @Environment(\.dismiss) private var dismiss
     
@@ -78,6 +79,12 @@ struct PostDetailView: View {
                 }
                 
                 Spacer()
+                
+                Text("Comments")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+
             }
             .padding()
         }
@@ -95,6 +102,7 @@ struct PostDetailView: View {
         }
         .background(HideTabBarView())
     }
+    
     func likePost() {
         isProcessingLike = true
         errorMessage = nil
