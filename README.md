@@ -185,6 +185,7 @@
       var title: String
       var content: String
       var ingredients: [String]
+      var image: String // url
   }
   ```
 
