@@ -95,6 +95,7 @@ struct RecipeDetailView: View {
                  submitPostToBackend(postRequest)
             }
         }
+        .background(HideTabBarView())
     }
     
     func shareRecipe() {
