@@ -52,7 +52,7 @@ public func configure(_ app: Application) async throws {
 
     try await app.rabbitMQ.connection.connect()
 
-    app.rabbitMQ.publisher = Publisher(app.rabbitMQ.connection, "MealFinderExchange")
+    app.rabbitMQ.publisher = Publisher(app.rabbitMQ.connection, "MealFinderExchange", exchangeOptions: .init(type: .direct, durable: false), publisherOptions: .init(properties: .init(deliveryMode: 2))) 
 
     // app.migrations.add(CreateTodo())
     app.migrations.add(CreateUser())
@@ -64,6 +64,8 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateCommentUserLike())
     app.migrations.add(CreatePostUserDislike())
     app.migrations.add(CreateCommentUserDislike())
+
+    app.http.server.configuration.hostname = "0.0.0.0"
 
     // register routes
     try routes(app)

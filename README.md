@@ -33,6 +33,16 @@
   - Basic Structure:
    ![Image Recognition Service](./image.png)
 
+  ### Machine Learning Server Design
+
+  For better scalability and flexibility, the ML consumer server is designed to be a separate service from the main web server. 
+  - Written in Python
+  - Pika for RabbitMQ
+  - Poetry for dependency management
+  - Designed AI agents based on OpenAI GPT-4o-mini as Image Recognition Model
+
+  To run the ML server, ensure you have Python 3.13 installed and use `poetry install` to install dependencies. 
+
 ## API Endpoints
 
 ### Authentication and User Management
@@ -185,6 +195,7 @@
       var title: String
       var content: String
       var ingredients: [String]
+      var image: String // url
   }
   ```
 
@@ -259,3 +270,59 @@
 
 - Delete comment
 - token required
+
+### Task Registration
+
+#### POST /tasks
+
+- Register a new task with an image
+- ***token required***
+- **Compress image before sending**
+- Request Body:
+  ```swift
+  struct CreateTaskRequest: Content {
+      var image: File
+  }
+  ```
+- Response Body:
+  ```swift
+  struct TaskDTO: Content {
+    var taskID: UUID
+    var key: String
+    var url: String 
+  }
+  ```
+
+#### GET /tasks/:id
+
+- Get task info by id
+- token required
+- Request Body: 
+  ```swift
+  struct CheckTaskResponse: Content {
+    var taskID: UUID
+    var status: TaskStatus
+    var result: [String]? // the result of the task
+  }
+  ```
+- Response Sample:
+  ```json
+  {
+    "taskID": "9F28A645-07E8-43F3-B646-AF766C88017D",
+    "result": [
+        "flour, eggs, milk, butter, white sugar, brown sugar, baking powder, salt"
+    ],
+    "status": "completed"
+  }
+  ```
+  ```json
+  {
+      "taskID": "3B3A71BA-EAF5-4D6A-A574-E3E68DFFCC5B",
+      "result": [
+          "cauliflower, carrots, broccoli, lettuce, garlic, yellow bell pepper, tomatoes, green bell pepper, zucchini, red bell pepper, celery, green onions, white radishes, parsley, green beans"
+      ],
+      "status": "completed"
+  }
+  ```
+
+
