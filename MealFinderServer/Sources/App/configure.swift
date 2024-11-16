@@ -52,7 +52,7 @@ public func configure(_ app: Application) async throws {
 
     try await app.rabbitMQ.connection.connect()
 
-    app.rabbitMQ.publisher = Publisher(app.rabbitMQ.connection, "MealFinderExchange")
+    app.rabbitMQ.publisher = Publisher(app.rabbitMQ.connection, "MealFinderExchange", exchangeOptions: .init(type: .direct, durable: false), publisherOptions: .init(properties: .init(deliveryMode: 2))) 
 
     // app.migrations.add(CreateTodo())
     app.migrations.add(CreateUser())
