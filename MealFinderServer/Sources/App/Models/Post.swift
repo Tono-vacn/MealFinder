@@ -98,6 +98,7 @@ extension Post {
         guard let recipe = try await self.$recipe.query(on: db).first() else {
             throw Abort(.internalServerError)
         }
+        let haveComments = try await self.hasComments(on: db)
         return PostDTOInline(
             id: self.id,
             title: self.title,
@@ -107,7 +108,8 @@ extension Post {
             createdAt: self.createdAt,
             updatedAt: self.updatedAt,
             userId: self.$user.id,
-            recipe: recipe.toDTO()
+            recipe: recipe.toDTO(),
+            haveComments: haveComments
         )
     }
 }
