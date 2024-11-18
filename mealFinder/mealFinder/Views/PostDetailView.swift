@@ -8,11 +8,14 @@
 import SwiftUI
 
 struct PostDetailView: View {
-    //let post: Post
     @State private var post: Post
+    @State private var comments: [CommentDTO] = []
     @State private var isProcessingLike = false
     @State private var isProcessingDislike = false
     @State private var errorMessage: String? = nil
+    @State private var isShowingCommentInput = false
+    @State private var commentTitle = ""
+    @State private var commentContent = ""
     let currentUserId: String
     @Environment(\.dismiss) private var dismiss
     
@@ -21,17 +24,13 @@ struct PostDetailView: View {
         self.currentUserId = currentUserId
     }
     
-    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                
                 Text(post.title)
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .padding(.top)
-                
-                
                 
                 HStack {
                     Text("Created At: \(formatDate(post.createdAt))")
@@ -42,7 +41,6 @@ struct PostDetailView: View {
                 
                 Divider()
                 
-                
                 Text(post.content)
                     .font(.body)
                     .padding(.top, 10)
@@ -50,12 +48,10 @@ struct PostDetailView: View {
                 Divider()
                 
                 HStack {
-                    Button(action: {
-                        likePost()
-                    }) {
+                    Button(action: likePost) {
                         HStack {
                             Image(systemName: "hand.thumbsup")
-                            Text("Like (\(post.likes))")
+                            Text("\(post.likes)")
                         }
                     }
                     .disabled(isProcessingLike)
@@ -63,29 +59,63 @@ struct PostDetailView: View {
                     .background(Color.green.opacity(0.2))
                     .cornerRadius(8)
                     
-                    Button(action: {
-                        dislikePost()
-                    }) {
+                    Button(action: dislikePost) {
                         HStack {
                             Image(systemName: "hand.thumbsdown")
-                            Text("Dislike (\(post.dislikes))")
+                            Text("\(post.dislikes)")
                         }
                     }
                     .disabled(isProcessingDislike)
                     .padding()
                     .background(Color.red.opacity(0.2))
                     .cornerRadius(8)
+                    
+                    Button(action: {
+                        isShowingCommentInput = true
+                    }) {
+                        HStack {
+                            Image(systemName: "square.and.pencil")
+                            Text("Add Comment")
+                        }
+                    }
+                    .padding()
+                    .background(Color.blue.opacity(0.2))
+                    .cornerRadius(8)
+                }
+                
+                
+                
+                Divider()
+                
+                Text("Comments")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .padding(.top)
+                
+                if comments.isEmpty {
+                    Text("No comments yet.")
+                        .foregroundColor(.gray)
+                } else {
+                    ForEach(comments) { comment in
+                        CommentView(
+                            comment: comment,
+                            onCommentUpdated: { loadComments() }
+                        )
+                    }
                 }
                 
                 Spacer()
+                
+                
             }
             .padding()
         }
         .navigationTitle("Post Detail")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear(){loadComments()}
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if post.userId == currentUserId { // only shows when the person is the person who write the post
+                if post.userId == currentUserId {
                     Button(action: deletePost) {
                         Image(systemName: "trash")
                             .foregroundColor(.red)
@@ -94,6 +124,40 @@ struct PostDetailView: View {
             }
         }
         .background(HideTabBarView())
+        .sheet(isPresented: $isShowingCommentInput) {
+            VStack {
+                Text("Add Comment")
+                    .font(.headline)
+                    .padding()
+                
+                TextField("Comment Title", text: $commentTitle)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                
+                TextField("Comment Content", text: $commentContent)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                
+                HStack {
+                    Button("Cancel") {
+                        isShowingCommentInput = false
+                    }
+                    .foregroundColor(.red)
+                    
+                    Spacer()
+                    
+                    Button("Submit") {
+                        submitComment()
+                        isShowingCommentInput = false
+                    }
+                    .foregroundColor(.blue)
+                }
+                .padding()
+            }
+            .padding()
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
     }
     
     func likePost() {
@@ -105,7 +169,6 @@ struct PostDetailView: View {
                 switch result {
                 case .success:
                     refreshPost()
-                    //print("refreshed")
                 case .failure(let error):
                     errorMessage = error.localizedDescription
                 }
@@ -113,7 +176,6 @@ struct PostDetailView: View {
         }
     }
     
-    // Dislike Post
     func dislikePost() {
         isProcessingDislike = true
         errorMessage = nil
@@ -131,16 +193,12 @@ struct PostDetailView: View {
     }
     
     func refreshPost() {
-        
         PostService.shared.fetchPost(by: post.id) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let updatedPost):
                     post = updatedPost
-                    print(post.likes)
-                    print("refresh succ")
                 case .failure(let error):
-                    print("refresh fail")
                     errorMessage = "Failed to refresh post: \(error.localizedDescription)"
                 }
             }
@@ -152,7 +210,6 @@ struct PostDetailView: View {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    print("delete successfully")
                     dismiss()
                 case .failure(let error):
                     errorMessage = "Failed to delete post: \(error.localizedDescription)"
@@ -160,6 +217,7 @@ struct PostDetailView: View {
             }
         }
     }
+    
     func formatDate(_ isoDate: String) -> String {
         let formatter = ISO8601DateFormatter()
         if let date = formatter.date(from: isoDate) {
@@ -171,5 +229,33 @@ struct PostDetailView: View {
             return "Invalid Date"
         }
     }
+    
+    func submitComment() {
+        let newComment = CreateCommentRequest(title: commentTitle, content: commentContent)
+        
+        CommentService.shared.addComment(postId: post.id, comment: newComment) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    loadComments()
+                case .failure(let error):
+                    errorMessage = "Failed to submit comment: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    func loadComments() {
+        CommentService.shared.fetchComments(for: post.id) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let fetchedComments):
+                    comments = fetchedComments
+                case .failure(let error):
+                    errorMessage = "Failed to load comments: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
 }
-
