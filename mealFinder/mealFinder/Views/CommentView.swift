@@ -12,9 +12,15 @@ struct CommentView: View {
     @State private var isProcessingLike = false
     @State private var isProcessingDislike = false
     @State private var errorMessage: String? = nil
-    let comment: CommentDTO
+    // for reply
+    @State private var isShowingReplyInut = false
+    @State private var replyTitle = ""
+    @State private var replyContent = ""
     
+    let comment: CommentDTO
     let onCommentUpdated: () -> Void
+    //let onReply
+    
     
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -70,13 +76,14 @@ struct CommentView: View {
     
     func likeComment() {
         guard let commentId = comment.id?.uuidString else { return }
+        //print(commentId)
         isProcessingLike = true
         CommentService.shared.likeComment(commentId: commentId) { result in
             DispatchQueue.main.async {
                 isProcessingLike = false
                 switch result {
                 case .success:
-                    print("Comment liked successfully.")
+                    //print("Comment liked successfully.")
                     onCommentUpdated()
                 case .failure(let error):
                     errorMessage = "Failed to like comment: \(error.localizedDescription)"
@@ -94,7 +101,7 @@ struct CommentView: View {
                 isProcessingDislike = false
                 switch result {
                 case .success:
-                    print("Comment disliked successfully.")
+                    //print("Comment disliked successfully.")
                     onCommentUpdated()
                 case .failure(let error):
                     errorMessage = "Failed to dislike comment: \(error.localizedDescription)"

@@ -10,7 +10,7 @@ import Foundation
 class CommentService {
     static let shared = CommentService()
     private let baseURL = "http://vcm-44239.vm.duke.edu:8080"
-    private let bearerToken = "Bearer gzg8ByILw4zvcJSdJhjzpg=="
+    private let bearerToken = "Bearer Bfkjg/1wsgiVGpBm62gbMw=="
     
     //MARK: ADD A COMMENT TO A POST
     func addComment(postId: String, comment: CreateCommentRequest, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -123,6 +123,9 @@ class CommentService {
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.addValue(bearerToken, forHTTPHeaderField: "Authorization") // Token
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
         
         URLSession.shared.dataTask(with: request) { _, response, error in
             if let error = error {
@@ -146,9 +149,12 @@ class CommentService {
             completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
             return
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.addValue(bearerToken, forHTTPHeaderField: "Authorization") // Token
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
         
         URLSession.shared.dataTask(with: request) { _, response, error in
             if let error = error {
