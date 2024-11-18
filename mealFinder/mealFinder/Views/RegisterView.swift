@@ -19,6 +19,7 @@ struct RegisterView: View {
     
     var body: some View {
         VStack {
+            Spacer()
             Text("Register")
                 .font(.largeTitle)
                 .padding(.bottom, 20)
@@ -61,6 +62,7 @@ struct RegisterView: View {
                     .padding(.horizontal)
             }
             .padding(.top, 20)
+            Spacer()
         }
     }
     

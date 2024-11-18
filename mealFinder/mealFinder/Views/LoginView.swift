@@ -18,6 +18,8 @@ struct LoginView: View {
     var body: some View {
         NavigationView {
             VStack {
+                Spacer()
+                
                 Text("Login")
                     .font(.largeTitle)
                     .padding(.bottom, 20)
@@ -47,14 +49,13 @@ struct LoginView: View {
                 }
                 .padding(.top, 20)
                 
-                Spacer()
-                
                 // Navigate to RegisterView
                 NavigationLink(destination: RegisterView()) {
                     Text("Don't have an account? Register")
                         .foregroundColor(.blue)
                         .padding(.top, 20)
                 }
+                Spacer()
             }
         }
     }
@@ -66,8 +67,8 @@ struct LoginView: View {
                 case .success(let token):
                     UserDefaults.standard.set(token, forKey: "userToken")
                     isLoggedIn = true
-                case .failure(let error):
-                    errorMessage = error.localizedDescription
+                case .failure(_):
+                    errorMessage = "Login failed. Please check your username and password."
                 }
             }
         }

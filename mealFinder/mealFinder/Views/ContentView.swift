@@ -11,7 +11,7 @@ import SwiftData
 
 struct ContentView: View {
     @State private var isLoggedIn: Bool = false // Tracks login status
-
+    
     var body: some View {
         ZStack {
             if isLoggedIn {
@@ -29,6 +29,10 @@ struct ContentView: View {
                         .tabItem {
                             Label("Forum", systemImage: "person.3")
                         }
+                    LogoutView(isLoggedIn: $isLoggedIn)
+                        .tabItem {
+                            Label("Logout", systemImage: "arrow.backward.circle")
+                        }
                 }
             } else {
                 // Show LoginView when not logged in
@@ -36,7 +40,7 @@ struct ContentView: View {
             }
         }.onAppear {
             if let _ = UserDefaults.standard.string(forKey: "userToken") {
-                isLoggedIn = true 
+                isLoggedIn = true
             }
         }
     }
