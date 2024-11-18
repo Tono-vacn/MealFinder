@@ -27,17 +27,17 @@ struct PostDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+
+                
                 Text(post.title)
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .padding(.top)
                 
-                HStack {
-                    Text("Created At: \(formatDate(post.createdAt))")
-                    Text("Updated At: \(formatDate(post.updatedAt))")
-                }
-                .font(.footnote)
-                .foregroundColor(.gray)
+
+                Text("Created At: \(formatDate(post.createdAt))")
+                    .font(.footnote)
+                    .foregroundColor(.gray)
                 
                 Divider()
                 
