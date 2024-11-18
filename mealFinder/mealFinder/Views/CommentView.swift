@@ -19,29 +19,48 @@ struct CommentView: View {
     @State private var replies: [CommentDTO] = []
     @State private var isLoadingReplies = false
     @State private var hasLoadedReplies = false
+    @State private var isRepliesShown = false
+    @State private var isShowingDeleteConfirmation = false
+    let currentUserId: String
     
-    let comment: CommentDTO
+    //let comment: CommentDTO
+    //@Binding var comment: CommentDTO
+    @State private var comment: CommentDTO
     let onCommentUpdated: () -> Void
     //let onReply: (CommentDTO) -> Void
     //let loadMoreReplies: () -> Void
-    
+    init(comment: CommentDTO, currentUserId: String, onCommentUpdated: @escaping () -> Void) {
+        _comment = State(initialValue: comment)
+        self.currentUserId = currentUserId
+        self.onCommentUpdated = onCommentUpdated
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
+            
             Text(comment.title)
                 .font(.headline)
+                .padding(.horizontal, 10)
             Text(comment.content)
                 .font(.subheadline)
                 .foregroundColor(.gray)
+                .padding(.horizontal, 10)
             HStack {
-                if comment.haveComments {
-                    Button("Load More") {
+                if !isRepliesShown && comment.haveComments {
+                    Button("Show replies") {
                         loadMoreReplies()
                     }
                     .foregroundColor(.blue)
                 }
                 
                 Spacer()
+                
+                if comment.userId?.uuidString == currentUserId{
+                    Button("Delete") {
+                        isShowingDeleteConfirmation = true
+                    }
+                    .foregroundColor(.red)
+                }
                 
                 Button("Reply") {
                     isShowingReplyInput = true
@@ -69,22 +88,28 @@ struct CommentView: View {
             }
             .font(.footnote)
             .foregroundColor(.secondary)
+            .padding(.horizontal,10)
+            .padding(.bottom, 10)
             
             if !replies.isEmpty {
                 ForEach(replies) { reply in
-                    CommentView(
-                        comment: reply,
-                        onCommentUpdated: onCommentUpdated
-                    )
-                    .padding(.leading, 20)
+                    VStack(alignment: .leading, spacing: 5) {
+                        CommentView(
+                            comment: reply,
+                            currentUserId: currentUserId,
+                            onCommentUpdated: onCommentUpdated
+                        )
+
+                    }
                 }
             }
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 10)
+        .padding(.leading, 5)
+        
         .background(Color.gray.opacity(0.1))
         .cornerRadius(8)
-        .padding(.vertical, 5)
+        .padding(.top, 5)
         .sheet(isPresented: $isShowingReplyInput) {
             VStack {
                 Text("Add Comment")
@@ -119,6 +144,16 @@ struct CommentView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
+        .alert(isPresented: $isShowingDeleteConfirmation) { // Alert for delete confirmation
+            Alert(
+                title: Text("Confirm Delete"),
+                message: Text("Are you sure you want to delete this comment?"),
+                primaryButton: .destructive(Text("Delete")) {
+                    deleteComment()
+                },
+                secondaryButton: .cancel()
+            )
+        }
     }
     
     func submitReply() {
@@ -130,8 +165,9 @@ struct CommentView: View {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    print("Reply submitted successfully.")
-                    onCommentUpdated()
+                    self.replyTitle = ""
+                    self.replyContent = ""
+                    self.loadMoreReplies(forceRefresh: true)
                 case .failure(let error):
                     errorMessage = "Failed to submit reply: \(error.localizedDescription)"
                 }
@@ -147,9 +183,8 @@ struct CommentView: View {
             DispatchQueue.main.async {
                 isProcessingLike = false
                 switch result {
-                case .success:
-                    //print("Comment liked successfully.")
-                    onCommentUpdated()
+                case .success(let updatedComment):
+                    updateReply(updatedComment)
                 case .failure(let error):
                     errorMessage = "Failed to like comment: \(error.localizedDescription)"
                 }
@@ -165,22 +200,31 @@ struct CommentView: View {
             DispatchQueue.main.async {
                 isProcessingDislike = false
                 switch result {
-                case .success:
-                    //print("Comment disliked successfully.")
-                    onCommentUpdated()
+                case .success(let updatedComment):
+                    updateReply(updatedComment)
                 case .failure(let error):
                     errorMessage = "Failed to dislike comment: \(error.localizedDescription)"
                 }
             }
         }
     }
+
     
-    func loadMoreReplies() {
+    func updateReply(_ updatedComment: CommentDTO) {
+        if let index = replies.firstIndex(where: { $0.id == updatedComment.id }) {
+            replies[index] = updatedComment
+        } else if comment.id == updatedComment.id {
+            comment = updatedComment
+        }
+    }
+    
+    func loadMoreReplies(forceRefresh: Bool = false) {
         guard let commentId = comment.id?.uuidString else { return }
-        if hasLoadedReplies {
-            print("Replies already loaded.")
+        if hasLoadedReplies && !forceRefresh {
+            isRepliesShown = true
             return
         }
+        
         isLoadingReplies = true
         errorMessage = nil
         
@@ -189,10 +233,27 @@ struct CommentView: View {
                 isLoadingReplies = false
                 switch result {
                 case .success(let fetchedReplies):
-                    replies.append(contentsOf: fetchedReplies)
+                    self.replies = fetchedReplies
                     hasLoadedReplies = true
+                    isRepliesShown = true
                 case .failure(let error):
                     errorMessage = "Failed to load replies: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    
+    func deleteComment() {
+        guard let commentId = comment.id?.uuidString else { return }
+        
+        CommentService.shared.deleteComment(commentId: commentId) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    onCommentUpdated()
+                case .failure(let error):
+                    errorMessage = "Failed to delete comment: \(error.localizedDescription)"
                 }
             }
         }

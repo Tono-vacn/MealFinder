@@ -16,6 +16,7 @@ struct PostDetailView: View {
     @State private var isShowingCommentInput = false
     @State private var commentTitle = ""
     @State private var commentContent = ""
+    @State private var isShowingDeleteConfirm = false
     let currentUserId: String
     @Environment(\.dismiss) private var dismiss
     
@@ -27,21 +28,29 @@ struct PostDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                
                 Text(post.title)
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .padding(.top)
                 
-                HStack {
-                    Text("Created At: \(formatDate(post.createdAt))")
-                    Text("Updated At: \(formatDate(post.updatedAt))")
-                }
-                .font(.footnote)
-                .foregroundColor(.gray)
+                
+                Text("Created At: \(formatDate(post.createdAt))")
+                    .font(.footnote)
+                    .foregroundColor(.gray)
                 
                 Divider()
                 
                 Text(post.content)
+                    .font(.body)
+                    .padding(.top, 10)
+                
+                Text("Related recipe: \(post.recipe!.title)")
+                    .font(.body)
+                    .fontWeight(.bold)
+                    .padding(.top)
+                
+                Text(post.recipe!.content)
                     .font(.body)
                     .padding(.top, 10)
                 
@@ -99,6 +108,7 @@ struct PostDetailView: View {
                     ForEach(comments) { comment in
                         CommentView(
                             comment: comment,
+                            currentUserId: currentUserId,
                             onCommentUpdated: { loadComments() }
                             //onReply: { comment in replyTo(comment: comment) }
                         )
@@ -117,7 +127,7 @@ struct PostDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if post.userId == currentUserId {
-                    Button(action: deletePost) {
+                    Button(action:{isShowingDeleteConfirm = true}) {
                         Image(systemName: "trash")
                             .foregroundColor(.red)
                     }
@@ -158,6 +168,16 @@ struct PostDetailView: View {
             .padding()
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
+        }
+        .alert(isPresented: $isShowingDeleteConfirm) {
+            Alert(
+                title: Text("Confirm Delete"),
+                message: Text("Are you sure you want to delete this post? This action cannot be undone."),
+                primaryButton: .destructive(Text("Delete")) {
+                    deletePost()
+                },
+                secondaryButton: .cancel()
+            )
         }
     }
     
