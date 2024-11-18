@@ -11,6 +11,7 @@ import UIKit
 
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
+    var onImagePicked: ((UIImage) -> Void)?
 
     func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {
         let picker = UIImagePickerController()
@@ -39,6 +40,7 @@ struct ImagePicker: UIViewControllerRepresentable {
         ) {
             if let uiImage = info[.originalImage] as? UIImage {
                 parent.image = uiImage
+                parent.onImagePicked?(uiImage)
             }
 
             picker.dismiss(animated: true)
