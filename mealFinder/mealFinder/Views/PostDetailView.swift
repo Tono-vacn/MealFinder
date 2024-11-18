@@ -17,6 +17,9 @@ struct PostDetailView: View {
     @State private var commentTitle = ""
     @State private var commentContent = ""
     @State private var isShowingDeleteConfirm = false
+    @State private var username: String = "Unknown"
+
+    
     let currentUserId: String
     @Environment(\.dismiss) private var dismiss
     
@@ -37,6 +40,10 @@ struct PostDetailView: View {
                 
                 Text("Created At: \(formatDate(post.createdAt))")
                     .font(.footnote)
+                    .foregroundColor(.gray)
+                
+                Text("Posted by: \(username)")
+                    .font(.subheadline)
                     .foregroundColor(.gray)
                 
                 Divider()
@@ -93,7 +100,6 @@ struct PostDetailView: View {
                 }
                 
                 
-                
                 Divider()
                 
                 Text("Comments")
@@ -123,7 +129,8 @@ struct PostDetailView: View {
         }
         .navigationTitle("Post Detail")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear(){loadComments()}
+        .onAppear(){loadComments()
+            fetchPostUser()}
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if post.userId == currentUserId {
@@ -274,6 +281,20 @@ struct PostDetailView: View {
                     comments = fetchedComments
                 case .failure(let error):
                     errorMessage = "Failed to load comments: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    func fetchPostUser() {
+        guard let userId = post.userId else { return }
+        UserService.shared.fetchUser(by: userId) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let user):
+                    self.username = user.username
+                case .failure(let error):
+                    print("Failed to fetch user: \(error.localizedDescription)")
                 }
             }
         }

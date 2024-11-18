@@ -57,7 +57,8 @@ struct CommentView: View {
                 
                 if comment.userId?.uuidString == currentUserId{
                     Button("Delete") {
-                        isShowingDeleteConfirmation = true
+                        //isShowingDeleteConfirmation = true
+                        deleteComment()
                     }
                     .foregroundColor(.red)
                 }
@@ -153,6 +154,7 @@ struct CommentView: View {
                 },
                 secondaryButton: .cancel()
             )
+            
         }
     }
     
