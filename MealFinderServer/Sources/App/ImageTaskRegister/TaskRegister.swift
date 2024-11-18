@@ -24,6 +24,10 @@ struct TaskRegister: RouteCollection {
     */
     let createTaskRequest = try req.content.decode(CreateTaskRequest.self)
     let imageData = createTaskRequest.image.data
+    let imageDataSizeCheck = Data(imageData.readableBytesView)
+    print("imageData Size: \(imageDataSizeCheck.count)")
+    print("imageData Size in KB: \(Double(imageDataSizeCheck.count) / 1024.0)")
+    
     guard let imageType = createTaskRequest.image.extension else {
       throw Abort(.badRequest)
     }
