@@ -12,8 +12,11 @@ class CommentService {
     private let baseURL = "http://vcm-44239.vm.duke.edu:8080"
     private let bearerToken = "Bearer Bfkjg/1wsgiVGpBm62gbMw=="
     
+    
     //MARK: ADD A COMMENT TO A POST
     func addComment(postId: String, comment: CreateCommentRequest, completion: @escaping (Result<Void, Error>) -> Void) {
+        //let bearerToken = UserDefaults.standard.string(forKey: "userToken")
+        
         guard let url = URL(string: "\(baseURL)/posts/\(postId)/comments") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
             return
@@ -206,4 +209,6 @@ class CommentService {
             completion(.success(())) // Reply added successfully
         }.resume()
     }
+    
+    
 }
