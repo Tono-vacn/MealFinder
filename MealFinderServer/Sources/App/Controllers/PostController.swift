@@ -34,9 +34,9 @@ struct PostController: RouteCollection {
   // }
 
   @Sendable
-  func index(req: Request) async throws -> [PostDTO] {
+  func index(req: Request) async throws -> [PostDTOInline] {
     return try await Post.query(on: req.db).all().async.reduce(into: []) { (result, post) in
-      result.append(try await post.toDTO(on: req.db))
+      result.append(try await post.toDTOInline(on: req.db))
     }
     //asynMap{ post in try await post.toDTO(on: req.db) }
   }
