@@ -16,6 +16,9 @@ struct CommentView: View {
     @State private var isShowingReplyInput = false
     @State private var replyTitle = ""
     @State private var replyContent = ""
+    @State private var replies: [CommentDTO] = []
+    @State private var isLoadingReplies = false
+    @State private var hasLoadedReplies = false
     
     let comment: CommentDTO
     let onCommentUpdated: () -> Void
@@ -33,7 +36,7 @@ struct CommentView: View {
             HStack {
                 if comment.haveComments {
                     Button("Load More") {
-                        //loadMoreReplies()
+                        loadMoreReplies()
                     }
                     .foregroundColor(.blue)
                 }
@@ -67,6 +70,15 @@ struct CommentView: View {
             .font(.footnote)
             .foregroundColor(.secondary)
             
+            if !replies.isEmpty {
+                ForEach(replies) { reply in
+                    CommentView(
+                        comment: reply,
+                        onCommentUpdated: onCommentUpdated
+                    )
+                    .padding(.leading, 20)
+                }
+            }
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -162,5 +174,29 @@ struct CommentView: View {
             }
         }
     }
+    
+    func loadMoreReplies() {
+        guard let commentId = comment.id?.uuidString else { return }
+        if hasLoadedReplies {
+            print("Replies already loaded.")
+            return
+        }
+        isLoadingReplies = true
+        errorMessage = nil
+        
+        CommentService.shared.fetchReplies(for: commentId) { result in
+            DispatchQueue.main.async {
+                isLoadingReplies = false
+                switch result {
+                case .success(let fetchedReplies):
+                    replies.append(contentsOf: fetchedReplies)
+                    hasLoadedReplies = true
+                case .failure(let error):
+                    errorMessage = "Failed to load replies: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
 }
 
