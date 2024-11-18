@@ -26,7 +26,7 @@ func submitPostToBackend(_ postRequest: CreatePostRequest) {
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.setValue("Bearer gzg8ByILw4zvcJSdJhjzpg==", forHTTPHeaderField: "Authorization")
+    request.setValue("Bearer Bfkjg/1wsgiVGpBm62gbMw==", forHTTPHeaderField: "Authorization")
     request.httpBody = jsonData
 
     // 4. Send request

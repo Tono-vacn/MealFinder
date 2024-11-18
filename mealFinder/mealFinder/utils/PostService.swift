@@ -11,7 +11,7 @@ import Foundation
 class PostService {
     static let shared = PostService()
     private let baseURL = "http://vcm-44239.vm.duke.edu:8080/posts"
-    private let bearerToken = "Bearer gzg8ByILw4zvcJSdJhjzpg=="
+    private let bearerToken = "Bearer Bfkjg/1wsgiVGpBm62gbMw=="
     
     //MARK: Llike a post
     func likePost(postId: String, completion: @escaping (Result<Void, Error>) -> Void) {
