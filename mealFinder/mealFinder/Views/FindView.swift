@@ -67,33 +67,38 @@ struct FindView: View {
                     Spacer(minLength: geometry.size.height * 0.03)
 
                     // Search bar section
-                    HStack {
-                        TextField("Enter ingredients (comma separated)", text: $ingredientsInput)
-                            .padding(10)
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(8)
-                            .overlay(
-                                HStack {
-                                    Spacer()
-                                    Button(action: {
-                                        showImagePicker = true
-                                    }) {
-                                        Image(systemName: "camera.fill")
-                                            .foregroundColor(.blue)
-                                            .padding(8)
-                                    }
-                                }
-                            )
-                        
-                        Button(action: searchRecipes) {
-                            Text("Search")
-                                .padding(.horizontal, 15)
-                                .padding(.vertical, 10)
-                                .background(Color.blue)
-                                .foregroundColor(.white)
+                    VStack(alignment: .leading, spacing: 5){
+                        HStack {
+                            TextField("", text: $ingredientsInput)
+                                .padding(10)
+                                .background(Color.gray.opacity(0.2))
                                 .cornerRadius(8)
+                                .overlay(
+                                    HStack {
+                                        Spacer()
+                                        Button(action: {
+                                            showImagePicker = true
+                                        }) {
+                                            Image(systemName: "camera.fill")
+                                                .foregroundColor(.blue)
+                                                .padding(8)
+                                        }
+                                    }
+                                )
+                            
+                            Button(action: searchRecipes) {
+                                Text("Search")
+                                    .padding(.horizontal, 15)
+                                    .padding(.vertical, 10)
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(8)
+                            }
                         }
-                    }
+                        Text("Please separate multiple ingredients with commas.")
+                                                .font(.footnote)
+                                                .foregroundColor(.gray)
+                                                .padding(.leading)}
                     .padding(.horizontal)
                     
                     //Spacer(minLength: geometry.size.height * 0.02)
