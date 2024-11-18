@@ -11,7 +11,7 @@ class UserService {
     static let shared = UserService()
 
     private let baseURL = "http://vcm-44239.vm.duke.edu:8080/users/me"
-    private let bearerToken = "Bearer gzg8ByILw4zvcJSdJhjzpg=="
+    private let bearerToken = "Bearer Bfkjg/1wsgiVGpBm62gbMw=="
 
     func fetchCurrentUser(completion: @escaping (Result<String, Error>) -> Void) {
         guard let url = URL(string: baseURL) else {
