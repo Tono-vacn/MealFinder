@@ -11,8 +11,78 @@ class UserService {
     static let shared = UserService()
 
     private let baseURL = "http://vcm-44239.vm.duke.edu:8080/users/me"
-    private let bearerToken = "Bearer gzg8ByILw4zvcJSdJhjzpg=="
+    private let bearerToken = "Bearer Bfkjg/1wsgiVGpBm62gbMw=="
+    private let loginURL = "http://vcm-44239.vm.duke.edu:8080"
 
+    func registerUser(username: String, email: String, password: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+            guard let url = URL(string: "\(loginURL)/users") else { return }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            let body: [String: String] = [
+                "username": username,
+                "email": email,
+                "password": password
+            ]
+            
+            request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
+            
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                
+                guard let data = data else {
+                    completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                    return
+                }
+                
+                do {
+                    let user = try JSONDecoder().decode(UserResponse.self, from: data)
+                    completion(.success(true))
+                } catch {
+                    completion(.failure(error))
+                }
+            }.resume()
+        }
+        
+        func loginUser(username: String, password: String, completion: @escaping (Result<String, Error>) -> Void) {
+            guard let url = URL(string: "\(loginURL)/users/login") else { return }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            let body: [String: String] = [
+                "username": username,
+                "password": password
+            ]
+            
+            request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
+            
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                
+                guard let data = data else {
+                    completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                    return
+                }
+                
+                do {
+                    let result = try JSONDecoder().decode(LoginResponse.self, from: data)
+                    completion(.success(result.token))
+                } catch {
+                    completion(.failure(error))
+                }
+            }.resume()
+        }
+    
     func fetchCurrentUser(completion: @escaping (Result<String, Error>) -> Void) {
         guard let url = URL(string: baseURL) else {
             completion(.failure(URLError(.badURL)))
@@ -48,5 +118,8 @@ struct UserResponse: Codable {
     let id: String
     let username: String
     let email: String
+}
+struct LoginResponse: Codable {
+    let token: String
 }
 
