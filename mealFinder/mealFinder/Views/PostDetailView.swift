@@ -100,6 +100,7 @@ struct PostDetailView: View {
                         CommentView(
                             comment: comment,
                             onCommentUpdated: { loadComments() }
+                            //onReply: { comment in replyTo(comment: comment) }
                         )
                     }
                 }

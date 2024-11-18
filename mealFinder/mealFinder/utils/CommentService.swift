@@ -149,7 +149,7 @@ class CommentService {
             completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue(bearerToken, forHTTPHeaderField: "Authorization") // Token
@@ -169,6 +169,41 @@ class CommentService {
             }
             
             completion(.success(()))
+        }.resume()
+    }
+    
+    //MARK: ADD A COMMENT TO A COMMENT
+    func addReply(to commentId: String, comment: CreateCommentRequest, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/comments/\(commentId)") else {
+            completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(bearerToken, forHTTPHeaderField: "Authorization") // Token required
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            request.httpBody = try JSONEncoder().encode(comment) // Encode the comment request body
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+                completion(.failure(NSError(domain: "Invalid response", code: statusCode, userInfo: nil)))
+                return
+            }
+            
+            completion(.success(())) // Reply added successfully
         }.resume()
     }
 }

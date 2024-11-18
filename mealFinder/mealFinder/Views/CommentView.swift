@@ -13,13 +13,14 @@ struct CommentView: View {
     @State private var isProcessingDislike = false
     @State private var errorMessage: String? = nil
     // for reply
-    @State private var isShowingReplyInut = false
+    @State private var isShowingReplyInput = false
     @State private var replyTitle = ""
     @State private var replyContent = ""
     
     let comment: CommentDTO
     let onCommentUpdated: () -> Void
-    //let onReply
+    //let onReply: (CommentDTO) -> Void
+    //let loadMoreReplies: () -> Void
     
     
     var body: some View {
@@ -40,7 +41,7 @@ struct CommentView: View {
                 Spacer()
                 
                 Button("Reply") {
-                    //onReply()
+                    isShowingReplyInput = true
                 }
                 .foregroundColor(.blue)
                 
@@ -72,6 +73,58 @@ struct CommentView: View {
         .background(Color.gray.opacity(0.1))
         .cornerRadius(8)
         .padding(.vertical, 5)
+        .sheet(isPresented: $isShowingReplyInput) {
+            VStack {
+                Text("Add Comment")
+                    .font(.headline)
+                    .padding()
+                
+                TextField("Reply Title", text: $replyTitle)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                
+                TextField("Reply Content", text: $replyContent)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                
+                HStack {
+                    Button("Cancel") {
+                        isShowingReplyInput = false
+                    }
+                    .foregroundColor(.red)
+                    
+                    Spacer()
+                    
+                    Button("Submit") {
+                        submitReply()
+                        isShowingReplyInput = false
+                    }
+                    .foregroundColor(.blue)
+                }
+                .padding()
+            }
+            .padding()
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
+    }
+    
+    func submitReply() {
+        guard let commentId = comment.id?.uuidString else { return }
+        
+        let newReply = CreateCommentRequest(title: replyTitle, content: replyContent)
+        
+        CommentService.shared.addReply(to: commentId, comment: newReply) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    print("Reply submitted successfully.")
+                    onCommentUpdated()
+                case .failure(let error):
+                    errorMessage = "Failed to submit reply: \(error.localizedDescription)"
+                }
+            }
+        }
     }
     
     func likeComment() {
