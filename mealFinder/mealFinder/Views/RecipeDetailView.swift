@@ -92,7 +92,7 @@ struct RecipeDetailView: View {
         }
         .sheet(isPresented: $showSharePostView) {
             SharePostView(recipe: Recipe(from: recipe)) { postRequest in
-                 submitPostToBackend(postRequest)
+                PostService.shared.submitPostToBackend(postRequest)
             }
         }
         .background(HideTabBarView())
