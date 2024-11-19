@@ -24,18 +24,20 @@ struct CommentView: View {
     let currentUserId: String
     
     //let comment: CommentDTO
-    //@Binding var comment: CommentDTO
-    @State private var comment: CommentDTO
+    @Binding var comment: CommentDTO
+//    @State private var comment: CommentDTO
     let onCommentUpdated: () -> Void
     //let onReply: (CommentDTO) -> Void
     //let loadMoreReplies: () -> Void
-    init(comment: CommentDTO, currentUserId: String, onCommentUpdated: @escaping () -> Void) {
-        _comment = State(initialValue: comment)
+    init(comment: Binding<CommentDTO>, currentUserId: String, onCommentUpdated: @escaping () -> Void) {
+//        _comment = State(initialValue: comment)
+        self._comment = comment
         self.currentUserId = currentUserId
         self.onCommentUpdated = onCommentUpdated
     }
     
     var body: some View {
+        
         VStack(alignment: .leading, spacing: 5) {
             
             Text(comment.title)
@@ -57,8 +59,22 @@ struct CommentView: View {
                 
                 if comment.userId?.uuidString == currentUserId{
                     Button("Delete") {
-                        //isShowingDeleteConfirmation = true
-                        deleteComment()
+                        DispatchQueue.main.async{
+                            print("try to delete")
+                            isShowingDeleteConfirmation = true
+                        }
+                        //deleteComment()
+                    }
+                    .alert(isPresented: $isShowingDeleteConfirmation) { // Alert for delete confirmation
+                        Alert(
+                            title: Text("Confirm Delete"),
+                            message: Text("Are you sure you want to delete this comment?"),
+                            primaryButton: .destructive(Text("Delete")) {
+                                deleteComment()
+                            },
+                            secondaryButton: .cancel()
+                        )
+                        
                     }
                     .foregroundColor(.red)
                 }
@@ -93,10 +109,10 @@ struct CommentView: View {
             .padding(.bottom, 10)
             
             if !replies.isEmpty {
-                ForEach(replies) { reply in
+                ForEach($replies) { $reply in
                     VStack(alignment: .leading, spacing: 5) {
                         CommentView(
-                            comment: reply,
+                            comment: $reply,
                             currentUserId: currentUserId,
                             onCommentUpdated: onCommentUpdated
                         )
@@ -145,17 +161,7 @@ struct CommentView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
-        .alert(isPresented: $isShowingDeleteConfirmation) { // Alert for delete confirmation
-            Alert(
-                title: Text("Confirm Delete"),
-                message: Text("Are you sure you want to delete this comment?"),
-                primaryButton: .destructive(Text("Delete")) {
-                    deleteComment()
-                },
-                secondaryButton: .cancel()
-            )
-            
-        }
+
     }
     
     func submitReply() {

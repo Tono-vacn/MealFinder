@@ -111,14 +111,17 @@ struct PostDetailView: View {
                     Text("No comments yet.")
                         .foregroundColor(.gray)
                 } else {
-                    ForEach(comments) { comment in
-                        CommentView(
-                            comment: comment,
-                            currentUserId: currentUserId,
-                            onCommentUpdated: { loadComments() }
-                            //onReply: { comment in replyTo(comment: comment) }
-                        )
-                    }
+//                    ZStack{
+                        ForEach($comments) { $comment in
+                            CommentView(
+                                comment: $comment,
+                                currentUserId: currentUserId,
+                                onCommentUpdated: { loadComments() }
+                                //onReply: { comment in replyTo(comment: comment) }
+                            )
+                        }
+//                    }
+//                    .padding(.bottom)
                 }
                 
                 Spacer()
@@ -137,6 +140,16 @@ struct PostDetailView: View {
                     Button(action:{isShowingDeleteConfirm = true}) {
                         Image(systemName: "trash")
                             .foregroundColor(.red)
+                    }
+                    .alert(isPresented: $isShowingDeleteConfirm) {
+                        Alert(
+                            title: Text("Confirm Delete"),
+                            message: Text("Are you sure you want to delete this post? This action cannot be undone."),
+                            primaryButton: .destructive(Text("Delete")) {
+                                deletePost()
+                            },
+                            secondaryButton: .cancel()
+                        )
                     }
                 }
             }
@@ -176,16 +189,16 @@ struct PostDetailView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
-        .alert(isPresented: $isShowingDeleteConfirm) {
-            Alert(
-                title: Text("Confirm Delete"),
-                message: Text("Are you sure you want to delete this post? This action cannot be undone."),
-                primaryButton: .destructive(Text("Delete")) {
-                    deletePost()
-                },
-                secondaryButton: .cancel()
-            )
-        }
+//        .alert(isPresented: $isShowingDeleteConfirm) {
+//            Alert(
+//                title: Text("Confirm Delete"),
+//                message: Text("Are you sure you want to delete this post? This action cannot be undone."),
+//                primaryButton: .destructive(Text("Delete")) {
+//                    deletePost()
+//                },
+//                secondaryButton: .cancel()
+//            )
+//        }
     }
     
     func likePost() {
