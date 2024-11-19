@@ -24,18 +24,21 @@ struct CommentView: View {
     let currentUserId: String
     
     //let comment: CommentDTO
-    //@Binding var comment: CommentDTO
-    @State private var comment: CommentDTO
+    @Binding var comment: CommentDTO
+    //    @State private var comment: CommentDTO
     let onCommentUpdated: () -> Void
-    //let onReply: (CommentDTO) -> Void
+    let onDelete: (UUID) -> Void
     //let loadMoreReplies: () -> Void
-    init(comment: CommentDTO, currentUserId: String, onCommentUpdated: @escaping () -> Void) {
-        _comment = State(initialValue: comment)
+    init(comment: Binding<CommentDTO>, currentUserId: String, onCommentUpdated: @escaping () -> Void, onDelete: @escaping (UUID) -> Void) {
+        //        _comment = State(initialValue: comment)
+        self._comment = comment
         self.currentUserId = currentUserId
         self.onCommentUpdated = onCommentUpdated
+        self.onDelete = onDelete
     }
     
     var body: some View {
+        
         VStack(alignment: .leading, spacing: 5) {
             
             Text(comment.title)
@@ -57,7 +60,22 @@ struct CommentView: View {
                 
                 if comment.userId?.uuidString == currentUserId{
                     Button("Delete") {
-                        isShowingDeleteConfirmation = true
+                        DispatchQueue.main.async{
+                            print("try to delete")
+                            isShowingDeleteConfirmation = true
+                        }
+                        //deleteComment()
+                    }
+                    .alert(isPresented: $isShowingDeleteConfirmation) { // Alert for delete confirmation
+                        Alert(
+                            title: Text("Confirm Delete"),
+                            message: Text("Are you sure you want to delete this comment?"),
+                            primaryButton: .destructive(Text("Delete")) {
+                                deleteComment()
+                            },
+                            secondaryButton: .cancel()
+                        )
+                        
                     }
                     .foregroundColor(.red)
                 }
@@ -92,14 +110,17 @@ struct CommentView: View {
             .padding(.bottom, 10)
             
             if !replies.isEmpty {
-                ForEach(replies) { reply in
+                ForEach($replies) { $reply in
                     VStack(alignment: .leading, spacing: 5) {
                         CommentView(
-                            comment: reply,
+                            comment: $reply,
                             currentUserId: currentUserId,
-                            onCommentUpdated: onCommentUpdated
+                            onCommentUpdated: onCommentUpdated,
+                            onDelete: { deletedReplyId in
+                                replies.removeAll { $0.id == deletedReplyId }
+                            }
                         )
-
+                        
                     }
                 }
             }
@@ -144,16 +165,7 @@ struct CommentView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
-        .alert(isPresented: $isShowingDeleteConfirmation) { // Alert for delete confirmation
-            Alert(
-                title: Text("Confirm Delete"),
-                message: Text("Are you sure you want to delete this comment?"),
-                primaryButton: .destructive(Text("Delete")) {
-                    deleteComment()
-                },
-                secondaryButton: .cancel()
-            )
-        }
+        
     }
     
     func submitReply() {
@@ -208,7 +220,7 @@ struct CommentView: View {
             }
         }
     }
-
+    
     
     func updateReply(_ updatedComment: CommentDTO) {
         if let index = replies.firstIndex(where: { $0.id == updatedComment.id }) {
@@ -251,7 +263,7 @@ struct CommentView: View {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    onCommentUpdated()
+                    onDelete(comment.id!)
                 case .failure(let error):
                     errorMessage = "Failed to delete comment: \(error.localizedDescription)"
                 }

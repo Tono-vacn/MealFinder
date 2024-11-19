@@ -17,6 +17,9 @@ struct PostDetailView: View {
     @State private var commentTitle = ""
     @State private var commentContent = ""
     @State private var isShowingDeleteConfirm = false
+    @State private var username: String = "Unknown"
+
+    
     let currentUserId: String
     @Environment(\.dismiss) private var dismiss
     
@@ -37,6 +40,10 @@ struct PostDetailView: View {
                 
                 Text("Created At: \(formatDate(post.createdAt))")
                     .font(.footnote)
+                    .foregroundColor(.gray)
+                
+                Text("Posted by: \(username)")
+                    .font(.subheadline)
                     .foregroundColor(.gray)
                 
                 Divider()
@@ -93,7 +100,6 @@ struct PostDetailView: View {
                 }
                 
                 
-                
                 Divider()
                 
                 Text("Comments")
@@ -105,14 +111,19 @@ struct PostDetailView: View {
                     Text("No comments yet.")
                         .foregroundColor(.gray)
                 } else {
-                    ForEach(comments) { comment in
-                        CommentView(
-                            comment: comment,
-                            currentUserId: currentUserId,
-                            onCommentUpdated: { loadComments() }
-                            //onReply: { comment in replyTo(comment: comment) }
-                        )
-                    }
+//                    ZStack{
+                        ForEach($comments) { $comment in
+                            CommentView(
+                                comment: $comment,
+                                currentUserId: currentUserId,
+                                onCommentUpdated: { loadComments() },
+                                onDelete: { deletedCommentId in
+                                    deleteCommentFromList(deletedCommentId)
+                                }
+                            )
+                        }
+//                    }
+//                    .padding(.bottom)
                 }
                 
                 Spacer()
@@ -123,13 +134,24 @@ struct PostDetailView: View {
         }
         .navigationTitle("Post Detail")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear(){loadComments()}
+        .onAppear(){loadComments()
+            fetchPostUser()}
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if post.userId == currentUserId {
                     Button(action:{isShowingDeleteConfirm = true}) {
                         Image(systemName: "trash")
                             .foregroundColor(.red)
+                    }
+                    .alert(isPresented: $isShowingDeleteConfirm) {
+                        Alert(
+                            title: Text("Confirm Delete"),
+                            message: Text("Are you sure you want to delete this post? This action cannot be undone."),
+                            primaryButton: .destructive(Text("Delete")) {
+                                deletePost()
+                            },
+                            secondaryButton: .cancel()
+                        )
                     }
                 }
             }
@@ -169,16 +191,20 @@ struct PostDetailView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
-        .alert(isPresented: $isShowingDeleteConfirm) {
-            Alert(
-                title: Text("Confirm Delete"),
-                message: Text("Are you sure you want to delete this post? This action cannot be undone."),
-                primaryButton: .destructive(Text("Delete")) {
-                    deletePost()
-                },
-                secondaryButton: .cancel()
-            )
-        }
+//        .alert(isPresented: $isShowingDeleteConfirm) {
+//            Alert(
+//                title: Text("Confirm Delete"),
+//                message: Text("Are you sure you want to delete this post? This action cannot be undone."),
+//                primaryButton: .destructive(Text("Delete")) {
+//                    deletePost()
+//                },
+//                secondaryButton: .cancel()
+//            )
+//        }
+    }
+    
+    func deleteCommentFromList(_ commentId: UUID) {
+        comments.removeAll { $0.id == commentId }
     }
     
     func likePost() {
@@ -274,6 +300,20 @@ struct PostDetailView: View {
                     comments = fetchedComments
                 case .failure(let error):
                     errorMessage = "Failed to load comments: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    func fetchPostUser() {
+        guard let userId = post.userId else { return }
+        UserService.shared.fetchUser(by: userId) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let user):
+                    self.username = user.username
+                case .failure(let error):
+                    print("Failed to fetch user: \(error.localizedDescription)")
                 }
             }
         }
