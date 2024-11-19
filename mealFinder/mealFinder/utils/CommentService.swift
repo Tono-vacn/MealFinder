@@ -10,8 +10,10 @@ import Foundation
 class CommentService {
     static let shared = CommentService()
     private let baseURL = "http://vcm-44239.vm.duke.edu:8080"
-    private let bearerToken = "Bearer Bfkjg/1wsgiVGpBm62gbMw=="
-    
+    //private let bearerToken = "Bearer Bfkjg/1wsgiVGpBm62gbMw=="
+    private var bearerToken: String {
+        return "Bearer \(UserDefaults.standard.string(forKey: "AuthToken") ?? "")"
+    }
     
     //MARK: ADD A COMMENT TO A POST
     func addComment(postId: String, comment: CreateCommentRequest, completion: @escaping (Result<Void, Error>) -> Void) {

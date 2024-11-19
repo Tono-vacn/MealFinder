@@ -93,7 +93,7 @@ struct DetailView: View {
         }
         .sheet(isPresented: $showSharePostView) {
             SharePostView(recipe: recipe) { postRequest in
-                submitPostToBackend(postRequest)
+                PostService.shared.submitPostToBackend(postRequest)
             }
         }
         //        .onAppear {
