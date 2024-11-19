@@ -25,15 +25,16 @@ struct CommentView: View {
     
     //let comment: CommentDTO
     @Binding var comment: CommentDTO
-//    @State private var comment: CommentDTO
+    //    @State private var comment: CommentDTO
     let onCommentUpdated: () -> Void
-    //let onReply: (CommentDTO) -> Void
+    let onDelete: (UUID) -> Void
     //let loadMoreReplies: () -> Void
-    init(comment: Binding<CommentDTO>, currentUserId: String, onCommentUpdated: @escaping () -> Void) {
-//        _comment = State(initialValue: comment)
+    init(comment: Binding<CommentDTO>, currentUserId: String, onCommentUpdated: @escaping () -> Void, onDelete: @escaping (UUID) -> Void) {
+        //        _comment = State(initialValue: comment)
         self._comment = comment
         self.currentUserId = currentUserId
         self.onCommentUpdated = onCommentUpdated
+        self.onDelete = onDelete
     }
     
     var body: some View {
@@ -114,9 +115,12 @@ struct CommentView: View {
                         CommentView(
                             comment: $reply,
                             currentUserId: currentUserId,
-                            onCommentUpdated: onCommentUpdated
+                            onCommentUpdated: onCommentUpdated,
+                            onDelete: { deletedReplyId in
+                                replies.removeAll { $0.id == deletedReplyId }
+                            }
                         )
-
+                        
                     }
                 }
             }
@@ -161,7 +165,7 @@ struct CommentView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
-
+        
     }
     
     func submitReply() {
@@ -216,7 +220,7 @@ struct CommentView: View {
             }
         }
     }
-
+    
     
     func updateReply(_ updatedComment: CommentDTO) {
         if let index = replies.firstIndex(where: { $0.id == updatedComment.id }) {
@@ -259,7 +263,7 @@ struct CommentView: View {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    onCommentUpdated()
+                    onDelete(comment.id!)
                 case .failure(let error):
                     errorMessage = "Failed to delete comment: \(error.localizedDescription)"
                 }

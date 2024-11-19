@@ -116,8 +116,10 @@ struct PostDetailView: View {
                             CommentView(
                                 comment: $comment,
                                 currentUserId: currentUserId,
-                                onCommentUpdated: { loadComments() }
-                                //onReply: { comment in replyTo(comment: comment) }
+                                onCommentUpdated: { loadComments() },
+                                onDelete: { deletedCommentId in
+                                    deleteCommentFromList(deletedCommentId)
+                                }
                             )
                         }
 //                    }
@@ -199,6 +201,10 @@ struct PostDetailView: View {
 //                secondaryButton: .cancel()
 //            )
 //        }
+    }
+    
+    func deleteCommentFromList(_ commentId: UUID) {
+        comments.removeAll { $0.id == commentId }
     }
     
     func likePost() {
