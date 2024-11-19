@@ -11,6 +11,10 @@ extension Application {
             typealias Value = BasicConnection
         }
 
+        struct RetryingConnectionKey: StorageKey {
+            typealias Value = RetryingConnection
+        }
+
         struct PublisherKey: StorageKey {
             typealias Value = Publisher
         }
@@ -27,6 +31,23 @@ extension Application {
                     Task {
                       await connection.close()
                     }
+                }
+            }
+        }
+
+        public var retryingConnection: RetryingConnection {
+            get {
+                guard let retryingConnection = self.application.storage[RetryingConnectionKey.self] else {
+                    fatalError("RabbitMQ retrying connection not setup. Use application.rabbitMQ.retryingConnection = ...")
+                }
+                return retryingConnection
+            }
+            nonmutating set {
+                self.application.storage.set(RetryingConnectionKey.self, to: newValue) { 
+                    retryingConnection in 
+                    // Task {
+                    //   await retryingConnection.close()
+                    // }
                 }
             }
         }
@@ -55,6 +76,10 @@ public extension Request {
     struct RabbitMQ {
         var connection: BasicConnection {
             return request.application.rabbitMQ.connection
+        }
+
+        var retryingConnection: RetryingConnection {
+            return request.application.rabbitMQ.retryingConnection
         }
 
         var publisher: Publisher {

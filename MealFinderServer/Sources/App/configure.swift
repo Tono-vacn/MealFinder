@@ -48,7 +48,7 @@ public func configure(_ app: Application) async throws {
 
     // let mqConnection = RabbitMq.BasicConnection(AppConfig.shared.rabbitMQUrl)
 
-    app.rabbitMQ.connection = RabbitMq.BasicConnection(AppConfig.shared.rabbitMQUrl)
+    app.rabbitMQ.connection = RabbitMq.BasicConnection(AppConfig.shared.rabbitMQUrl, connectionPollingInterval: .seconds(15))
 
     try await app.rabbitMQ.connection.connect()
 
