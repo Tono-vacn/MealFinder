@@ -106,19 +106,21 @@ struct FindView: View {
                 
                 if isDetecting{
                     ProgressView("Detecting ingredients...")
-                } else if let errorMessage = errorMessage {
-                    Text("Error: \(errorMessage)")
-                        .foregroundColor(.red)
-                        .padding()
-                }
-                // Loading indicator or error message
-                if isLoading {
+                } else if isLoading {
                     ProgressView("Loading recipes...")
                 } else if let errorMessage = errorMessage {
                     Text("Error: \(errorMessage)")
                         .foregroundColor(.red)
                         .padding()
                 }
+                // Loading indicator or error message
+//                if isLoading {
+//                    ProgressView("Loading recipes...")
+//                } else if let errorMessage = errorMessage {
+//                    Text("Error: \(errorMessage)")
+//                        .foregroundColor(.red)
+//                        .padding()
+//                }
                 
                 Spacer() // Push content evenly towards the top
             }
@@ -217,9 +219,11 @@ struct FindView: View {
                         case "completed":
                             print("Task completed: \(taskResponse.result ?? [])")
                             self.handleTaskSuccess(result: taskResponse.result)
+                            isDetecting = false
                         case "failed", "error":
                             print("Task failed or encountered an error.")
                             self.errorMessage = "No ingredients detected. Please try another image."
+                            isDetecting = false
                         default: break
                         }
                     case .failure(let error):
