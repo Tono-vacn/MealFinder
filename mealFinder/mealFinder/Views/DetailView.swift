@@ -86,7 +86,7 @@ struct DetailView: View {
             
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: shareRecipe) {
-                    Image(systemName: "square.and.arrow.up")
+                    Image(systemName: "square.and.pencil")
                         .font(.title2)
                         .foregroundColor(.blue)
                 }
