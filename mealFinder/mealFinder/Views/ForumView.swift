@@ -24,7 +24,7 @@ struct ForumView: View {
                         .foregroundColor(.red)
                         .padding()
                 } else {
-                    List(posts) { post in
+                    List(posts.reversed()) { post in
                         NavigationLink(destination: PostDetailView(post: post, currentUserId: currentUserId ?? "")) {
                             VStack(alignment: .leading) {
                                 HStack(alignment: .top){
