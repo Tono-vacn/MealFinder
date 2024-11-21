@@ -8,6 +8,7 @@ struct CreateRecipe: AsyncMigration {
             .field("title", .string, .required)
             .field("content", .string, .required)
             .field("ingredients", .array(of: .string), .required)
+            .field("image", .string)
             .create()
     }
 
