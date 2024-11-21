@@ -6,6 +6,7 @@ struct RecipeDTO: Content {
     var title: String
     var content: String
     var ingredients: [String]
+    var image: String?
 
     func toModel() -> Recipe {
         return Recipe(
@@ -21,4 +22,5 @@ struct CreateRecipeRequest: Content {
     var title: String
     var content: String
     var ingredients: [String]
+    var image: String?
 }
