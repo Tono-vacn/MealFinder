@@ -36,6 +36,7 @@ struct DetailView: View {
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
+                            .cornerRadius(15)
                     } placeholder: {
                         ProgressView()
                     }
@@ -93,7 +94,7 @@ struct DetailView: View {
         }
         .sheet(isPresented: $showSharePostView) {
             SharePostView(recipe: recipe) { postRequest in
-                submitPostToBackend(postRequest)
+                PostService.shared.submitPostToBackend(postRequest)
             }
         }
         //        .onAppear {

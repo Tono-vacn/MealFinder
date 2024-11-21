@@ -30,6 +30,7 @@ struct RecipeDetailView: View {
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
+                            .cornerRadius(15)
                     } placeholder: {
                         ProgressView()
                     }
@@ -92,7 +93,7 @@ struct RecipeDetailView: View {
         }
         .sheet(isPresented: $showSharePostView) {
             SharePostView(recipe: Recipe(from: recipe)) { postRequest in
-                 submitPostToBackend(postRequest)
+                PostService.shared.submitPostToBackend(postRequest)
             }
         }
         .background(HideTabBarView())
