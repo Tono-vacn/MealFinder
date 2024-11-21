@@ -100,7 +100,7 @@ struct PostController: RouteCollection {
       let response = try await req.db.transaction { db -> CreatePostResponse in
         let recipe = Recipe(
           title: rawPost.recipe.title, content: rawPost.recipe.content,
-          ingredients: rawPost.recipe.ingredients)
+          ingredients: rawPost.recipe.ingredients, image: rawPost.recipe.image)
         try await recipe.save(on: db)
         let post = Post(
           title: rawPost.title, content: rawPost.content, createdAt: Date(), updatedAt: Date(),
