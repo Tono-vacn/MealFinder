@@ -25,6 +25,7 @@ struct Recipee: Codable {
     var title: String
     var content: String
     var ingredients: [String]
+    var image: String?
 }
 
 struct CreatePostRequest: Codable {
@@ -38,4 +39,5 @@ struct CreateRecipeRequest: Codable {
     var title: String
     var content: String
     var ingredients: [String]
+    var image: String
 }

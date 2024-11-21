@@ -57,6 +57,21 @@ struct PostDetailView: View {
                     .fontWeight(.bold)
                     .padding(.top)
                 
+                if let imageUrlString = post.recipe!.image,
+                   let imageUrl = URL(string: imageUrlString) {
+                    AsyncImage(url: imageUrl) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .cornerRadius(15)
+                    } placeholder: {
+                        EmptyView()
+                    }
+                    .frame(height: 300)
+                    .cornerRadius(10)
+                    .padding(.vertical)
+                }
+                
                 Text(post.recipe!.content)
                     .font(.body)
                     .padding(.top, 10)

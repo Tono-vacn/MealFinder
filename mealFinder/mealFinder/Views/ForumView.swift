@@ -27,14 +27,36 @@ struct ForumView: View {
                     List(posts) { post in
                         NavigationLink(destination: PostDetailView(post: post, currentUserId: currentUserId ?? "")) {
                             VStack(alignment: .leading) {
-                                Text(post.title)
-                                    .font(.headline)
-                                Text("Likes: \(post.likes), Dislikes: \(post.dislikes)")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                Text(post.content)
-                                    .lineLimit(2)
-                                    .foregroundColor(.secondary)
+                                HStack(alignment: .top){
+                                    if let imageUrlString = post.recipe!.image,
+                                       let imageUrl = URL(string: imageUrlString) {
+                                        AsyncImage(url: imageUrl) { image in
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .cornerRadius(8)
+                                        } placeholder: {
+                                            EmptyView()
+                                        }
+                                        .frame(width: 80, height: 60)
+                                        .cornerRadius(8)
+                                        .clipped()
+                                    }
+                                    VStack(alignment: .leading){
+                                        
+                                        Text(post.title)
+                                            .font(.headline)
+                                        Text(post.content)
+                                            .lineLimit(1)
+                                            .foregroundColor(.secondary)
+                                        Text("Likes: \(post.likes), Dislikes: \(post.dislikes)")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                        
+                                    }
+                                }
+                                
+
                                 Text("Created At: \(formatDate(post.createdAt))")
                                     .font(.footnote)
                                     .foregroundColor(.gray)

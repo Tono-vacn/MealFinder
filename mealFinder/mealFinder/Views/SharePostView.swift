@@ -81,7 +81,7 @@ struct SharePostView: View {
                 Button(action: {
                     let ingredientsArray = recipe.usedIngredients.map { $0.name }
 
-                    let recipeRequest = CreateRecipeRequest(title: recipe.title, content: recipe.description ?? "", ingredients: ingredientsArray)
+                    let recipeRequest = CreateRecipeRequest(title: recipe.title, content: recipe.description ?? "", ingredients: ingredientsArray, image: recipe.image)
                     let postRequest = CreatePostRequest(title: postTitle, content: postContent, recipe: recipeRequest)
 
                     onSubmit(postRequest)
