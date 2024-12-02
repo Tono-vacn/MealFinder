@@ -1,8 +1,155 @@
-# MealFinderServer README
+# Table of Contents
 
+- [Table of Contents](#table-of-contents)
+- [MealFinderApp Guide](#mealfinderapp-guide)
+  - [Important Clarifications for Code Review](#important-clarifications-for-code-review)
+  - [**Accounts for Code Review**](#accounts-for-code-review)
+  - [App Setup](#app-setup)
+  - [App Structure](#app-structure)
+  - [App features (User Guide for MealFinderApp)](#app-features-user-guide-for-mealfinderapp)
+    - [Login and Register](#login-and-register)
+    - [Find Page](#find-page)
+      - [Result Pop-up](#result-pop-up)
+      - [Recipe Details](#recipe-details)
+    - [Library Page](#library-page)
+    - [Forum Page](#forum-page)
+      - [Post Details](#post-details)
+    - [Log out page](#log-out-page)
+- [MealFinderServer Guide](#mealfinderserver-guide)
+  - [Server Setup](#server-setup)
+  - [Migrations](#migrations)
+  - [Swift Web Server Structure](#swift-web-server-structure)
+  - [Design of Image Recognition Service](#design-of-image-recognition-service)
+    - [Image Recognition Server Design](#image-recognition-server-design)
+  - [API Endpoints](#api-endpoints)
+    - [Authentication and User Management](#authentication-and-user-management)
+      - [POST /users](#post-users)
+      - [GET /users/:id](#get-usersid)
+      - [POST /users/login](#post-userslogin)
+      - [POST /users/logout](#post-userslogout)
+      - [GET /users/me](#get-usersme)
+      - [PUT /users/:id](#put-usersid)
+      - [DELETE /users/:id](#delete-usersid)
+    - [Post Management](#post-management)
+      - [POST /posts](#post-posts)
+      - [GET /posts/:id](#get-postsid)
+      - [GET /posts/:id/comments](#get-postsidcomments)
+      - [POST /posts/create](#post-postscreate)
+      - [POST /posts/:id/like](#post-postsidlike)
+      - [POST /posts/:id/dislike](#post-postsiddislike)
+      - [POST /posts/:id/comments](#post-postsidcomments)
+      - [PUT /posts/:id](#put-postsid)
+      - [DELETE /posts/:id](#delete-postsid)
+    - [Comment Management](#comment-management)
+      - [GET /comments/:id](#get-commentsid)
+      - [POST /comments/:id](#post-commentsid)
+      - [POST /comments/:id/like](#post-commentsidlike)
+      - [POST /comments/:id/dislike](#post-commentsiddislike)
+      - [DELETE /comments/:id](#delete-commentsid)
+    - [Task Registration](#task-registration)
+      - [POST /tasks](#post-tasks)
+      - [GET /tasks/:id](#get-tasksid)
+
+
+# MealFinderApp Guide
+
+## Important Clarifications for Code Review
+
+*Clarification for User Authentication System:* The user register and login system is implemented for server safety and security. We want to make sure that only authorized users can access certain services. We believe that's common practice in real-world applications.
+
+*API Usage Clarification:* Because we are using the free version of Spoonacular API (a third-party API for recipe search), the API has a **limit on the number of requests** on a **daily** basis. If you encounter any usage issues, usually `Failed to fetch instructions for recipe`, please inform us or replace the api key in the `utils/RecipeService.swift` file.
+
+*Server Availability Clarification:* Although we have designed the server in a proper way and used several methods to ensure the server is available in most cases, there might be possibility that the server is not available due to vcm issues or other reasons. If you encounter any server issues, please inform us and we will try to fix it as soon as possible.
+
+## **Accounts for Code Review**
+
+Accounts:
+- Username: `Carl`, Password: `111`
+- Username: `Kejia`, Password: `222`
+- Username: `Ric`, Password: `000`
+
+## App Setup
+
+clone the repo and run the app on Xcode.
+
+
+## App Structure
+
+![app_structure](image-1.png)
+
+## App features (User Guide for MealFinderApp)
+
+### Login and Register
+
+Use preregistred accounts to login or register a new account in the initial screen.
+
+### Find Page
+
+- Search Bar: Search for recipes by ingredients.
+- Search By Image: Take a photo or upload an image to search for recipes.
+
+#### Result Pop-up
+
+- After searching, results will be displayed in a pop-up window.
+- Swipe left or right to view different recipes and click on the recipe to view details.
+
+#### Recipe Details
+- Click `Save` to save the recipe to your **local** favorite library.
+- Click `Share` Button to share the recipe on the forum as a post.
+
+### Library Page
+
+- Click list items to view recipes saved in the library.
+- Swipe left to delete a recipe from the library.
+- Detail page also has the `Share` button to share the recipe on the forum as a post. 
+
+### Forum Page
+
+- View posts from other users.
+- Click on a post to view details.
+
+#### Post Details
+
+- Click `Like` or `Dislike` to like or dislike **a post or a comment**.
+- Click `Add Comment` to add a comment to the post.
+- Click `Reply` to reply to a comment. 
+- Click `Delete` to delete a post or a comment (**only the author can delete**).
+
+### Log out page
+
+- Click `Log out` to log out of the app.
+
+# MealFinderServer Guide
+
+## Server Setup
+
+A running instance contains all services is deployed on Duke VCM. For code review use, you can use mobile app to interact with the server directly.
+
+To deploy the server on you own server or local machine, follow the steps below:
+
+1. Prerequisites: (ensure you have these services running and add `.env` file in the root directory)
+  - RabbitMQ
+  - Redis
+  - S3 Bucket
+  - PostgreSQL
+
+2. Set up Swift Web Server
+  - clone the server repo
+  - Install Swift (version 6.0)
+  - run `Swift run build` to build the project
+  - run `Swift run App` to start the server
+
+3. Set up ML Server
+   - clone the server repo
+   - Setup and Install Poetry for Python 3.13
+   - run `poetry install` to install dependencies
+   - run `python main.py` to start the server
+ 
 ## Migrations
 
   ```Shell
+
+  vapor run migrate
 
   vapor run migrate --revert
 
@@ -10,11 +157,9 @@
 
   ```
 
-  ```Shell
-  vapor run migrate --revert-all
-  vapor run migrate
-  ```
+## Swift Web Server Structure
 
+![web_server](image-2.png)
 
 ## Design of Image Recognition Service
 
@@ -26,14 +171,16 @@
     - Task result query (By Swift Web Server): query result from Redis by task id
   - Technologies:
     - Swift Web Server: Vapor
-    - Machine Learning Model Server: Python Flask with PyTorch ? (not implemented)
+    - Machine Learning Model Server: Python Flask with PyTorch
     - Message Queue: RabbitMQ
     - Image Storage: S3
     - Cache: Redis
   - Basic Structure:
    ![Image Recognition Service](./image.png)
 
-  ### Machine Learning Server Design
+  ### Image Recognition Server Design
+
+    ![ML_server](image-3.png)
 
   For better scalability and flexibility, the ML consumer server is designed to be a separate service from the main web server. 
   - Written in Python
