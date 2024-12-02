@@ -180,6 +180,7 @@ To deploy the server on you own server or local machine, follow the steps below:
 
   ### Image Recognition Server Design
 
+  - structure
     ![ML_server](image-3.png)
 
   For better scalability and flexibility, the ML consumer server is designed to be a separate service from the main web server. 
