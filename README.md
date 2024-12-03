@@ -57,7 +57,11 @@
 
 *Clarification for User Authentication System:* The user register and login system is implemented for server safety and security. We want to make sure that only authorized users can access certain services. We believe that's common practice in real-world applications.
 
-*API Usage Clarification:* Because we are using the free version of Spoonacular API (a third-party API for recipe search), the API has a **limit on the number of requests** on a **daily** basis. If you encounter any usage issues, usually `Failed to fetch instructions for recipe`, please inform us or replace the api key in the `utils/RecipeService.swift` file.
+*API Usage Clarification:* Because we are using the free version of Spoonacular API (a third-party API for recipe search), the API has a **limit on the number of requests** on a **daily** basis. If you encounter any usage issues, usually `Failed to fetch instructions for recipe`, please inform us or replace the api key in the `utils/RecipeService.swift` file.  
+
+*Available API Keys:*  
+- `eb7eed994fc64755be038c4e3f7cc3c6`  
+- `93a2224a02154eefb3fb06b594e4b993`
 
 *Server Availability Clarification:* Although we have designed the server in a proper way and used several methods to ensure the server is available in most cases, there might be possibility that the server is not available due to vcm issues or other reasons. If you encounter any server issues, please inform us and we will try to fix it as soon as possible.
 
